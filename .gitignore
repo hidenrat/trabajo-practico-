@@ -1,0 +1,22 @@
+Pipfile*
+__pycache__/
+# Ignorar carpetas de entornos virtuales
+venv/
+.venv/
+env/
+
+# Ignorar archivos de configuración de entorno
+.env
+.env.*
+
+# Ignorar archivos de cache de Python
+*.pyc
+
+# Ignorar logs
+*.log
+
+# Ignorar configuraciones de VS Code
+.vscode/
+
+# Ignorar dependencias de Node.js
+node_modules/
