@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from db import get_db_connection 
+from db import get_conexion 
 #Se debe instalar Flask-CORS 
 #para permitir llamadas desde el puerto 5002
 #Comando en bash: pip install flask-cors
@@ -12,7 +12,7 @@ CORS(app)
 #ENDPOINT 
 @app.route('/api/cabanas', methods=['GET'])
 def get_cabanas():
-    conn = get_db_connection()      # Crea la conexión a MYSQL
+    conn = get_conexion()      # Crea la conexión a MYSQL
     cursor = conn.cursor(dictionary=True)  # Crea un “cursor” para ejecutar consultas sql
     cursor.execute("""
         SELECT 

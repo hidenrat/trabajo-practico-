@@ -8,7 +8,10 @@ def get_conexion():
         user="root",
         password="",
         #aca pongan la contraseña q hayan puesto
-        database="sistema_reserva"
+        database="sistema_reservas"
         #aca pongan el nombre de su base de datos
     )
     return conexion
+
+
+
