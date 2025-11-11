@@ -11805,3 +11805,73 @@ textarea.form-control {
     height: auto; /* Mantiene la proporción de la imagen */
     border-radius: 10px; /* Añade bordes redondeados a la imagen */
 }
+
+.portfolio-item img {
+  border-radius: 10px;
+}
+
+.text-holder {
+  border-radius: 10px;
+}
+
+.video-container {
+  position: relative;
+  padding-bottom: 43%; /* Relación de aspecto 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+
+video {
+  border-radius: 10px;
+}
+
+#experiencesCarousel {
+    position: relative;
+    cursor: grab;
+    user-select: none;
+}
+
+#experiencesCarousel:active {
+    cursor: grabbing;
+}
+
+#experiencesCarousel .carousel-indicators {
+    bottom: -50px;
+}
+
+#experiencesCarousel .carousel-indicators li {
+    background-color: #6c757d;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#experiencesCarousel .carousel-indicators .active {
+    background-color: var(--primary);
+}
+
+#experiencesCarousel .carousel-item {
+    transition: transform 0.6s ease-in-out;
+}
+
+/* Ocultar los controles de navegación lateral */
+#experiencesCarousel .carousel-control-prev,
+#experiencesCarousel .carousel-control-next {
+    display: none;
+}
+
+/* Ajustar margen inferior de la sección para los indicadores */
+#experiences {
+    padding-bottom: 80px;
+}
+
+/* Estilos para las tarjetas */
+#experiencesCarousel .card {
+    transition: transform 0.3s ease;
+}
+
+#experiencesCarousel .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}

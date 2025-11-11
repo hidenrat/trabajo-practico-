@@ -1,23 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Start your development with LeadMark landing page.">
-    <meta name="author" content="Devcrud">
-    <title>  Nordika Cabins </title>
-    <!-- font icons -->
-    <link rel="stylesheet" href="static/vendors/themify-icons/css/themify-icons.css">
-    <!-- Bootstrap + LeadMark main styles -->
-	<link rel="stylesheet" href="static/css/leadmark.css">
-</head>
-<body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
+{% extends "base.html" %}
 
-    <!-- page Navigation -->
+{% block title %}Inicio - Nordika Cabins{% endblock %}
+
+{% block content %}
     <nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
         <div class="container">
             <a style="scroll-behavior: smooth;" class="navbar-brand" href="#">
-                <img src="static/imgs/logo.svg" alt="">
+                <img src="{{url_for('static', filename='logo.svg', _external=True)}}" alt="">
             </a>
             <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -34,7 +23,10 @@
                         <a class="nav-link" href="#blog">Experiencias</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contactos</a>
+                        <a class="nav-link" href="#testimonial">Comentarios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contacto</a>
                     </li>
                     <li class="nav-item">
                         <a href="hola.html" class="ml-4 nav-link btn btn-primary btn-sm rounded">Reservar Cabaña</a>
@@ -70,8 +62,11 @@
                                     Nuestra historia comenzó con un pequeño grupo de visionarios que soñaban con ofrecer un alojamiento único. Hoy, somos una empresa reconocida por la calidad de nuestras cabañas y el servicio excepcional que brindamos a nuestros huéspedes.</h5>
         </div>
         <div class="about-image">
-            <img src="static/imgs/about-image.jpg" alt="Descripción de la imagen" class="img-fluid">
+            <img src="{{url_for('static', filename='imgs/about-image.jpg', _external=True)}}" alt="Descripción de la imagen" class="img-fluid">
         </div>
+    </div>
+    <div class="video-container">
+        <video src="{{ url_for('static', filename='imgs/video-cabaña.mp4', _external=True) }}" controls muted autoplay></video>
     </div>
 </section>
 <!-- End OF About Section -->
@@ -80,7 +75,6 @@
     <section  id="service" class="section pt-0">
         <div class="container">
             <h6 class="section-title text-center" id="service-title">¡Alquilar una cabaña con Nordika Cabins es más facil de lo que imaginás!</h6>
-            <!-- HAY MUCHAS CLASS NAME CAMBIAMOS TODO POR ID???-->
             <div class="row">
                 <div class="col-md-4">
                     <div class="card mb-4 mb-md-0">
@@ -120,216 +114,66 @@
     <section id="portfolio" class="section portfolio-section">
         <div class="container">
             <h6 class="section-title text-center">Nuestras Cabañas</h6>
-            <h6 class="section-subtitle mb-5 text-center">Espacios diseñados para que te desconectes y disfrutes de la tranquilidad en cada rincón.</h6>
+            <h6 class="section-subtitle mb-5 text-center">Espacios diseñados para que te desconectes y disfrutes.</h6>
             <div class="filters">
-                <a href="#" data-filter=".new" class="active">Mirador del Sol</a>
-                <a href="#" data-filter=".advertising">Bosque Vivo</a>
-                <a href="#" data-filter=".branding">Rincón Lunar</a>
-                <a href="#" data-filter=".web">Río Nativo</a>
+                {% for cabin in cabins %}
+                    <a href="#" data-filter=".{{ cabin.slug }}" class="{% if loop.first %}active{% endif %}">{{ cabin.name }}</a>
+                {% endfor %}
             </div>
-            <div class="portfolio-container"> 
-                <div class="col-md-6 col-lg-4 web new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/web-1.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/web-1.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">TEXTO DENTRO DE LA IMAGEN</h6>
-                                <p class="subtitle">INFO DENTRO DE LA IMAGEN</p>
-                            </div>
-                        </div>   
-                    </div>             
-                <!-- TODO CODIGO REPETIDO VER SI VAMOS A BORRAR O PORNER BLOQUE-->
-                </div>
-                <div class="col-md-6 col-lg-4 web new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/web-2.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/web-2.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">WEB</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div> 
-                    </div>                         
-                </div>
-                <div class="col-md-6 col-lg-4 advertising new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/advertising-2.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">                         
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/advertising-2.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">ADVERSTISING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>    
-                    </div>              
-                </div> 
-                <div class="col-md-6 col-lg-4 web">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/web-4.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/web-4.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">WEB</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
+            <div class="portfolio-container">
+                {% for cabin in cabins %}
+                    {% for img in cabin.images %}
+                        <div class="col-md-6 col-lg-4 {{ cabin.slug }}">
+                            <div class="portfolio-item">
+                                <img src="{{ url_for('static', filename=img.src, _external=True) }}" class="img-fluid" alt="{{ img.title }}">
+                                <div class="content-holder">
+                                    <a class="img-popup" href="{{ url_for('static', filename=img.src, _external=True) }}"></a>
+                                    <div class="text-holder">
+                                        <h6 class="title">{{ img.title }}</h6>
+                                        <p class="subtitle">{{ img.subtitle }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>                                                     
-                </div>
-
-                <div class="col-md-6 col-lg-4 advertising"> 
-                    <div class="portfolio-item">
-                        <img src="static/imgs/advertising-1.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">                               
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/advertising-1.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">ADVERSITING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                       
-                </div> 
-                <div class="col-md-6 col-lg-4 web new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/web-3.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">  
-                       <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/web-3.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">WEB</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                     
-                </div>
-                <div class="col-md-6 col-lg-4 advertising new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/advertising-3.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">       
-                       <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/advertising-3.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">ADVERSITING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                       
-                </div> 
-                <div class="col-md-6 col-lg-4 advertising new"> 
-                    <div class="portfolio-item">
-                        <img src="static/imgs/advertising-4.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">            
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/advertising-4.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">ADVERTISING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>
-                            
-                </div> 
-                <div class="col-md-6 col-lg-4 branding new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/branding-1.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">                        
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/branding-1.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">BRANDING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div> 
-                    </div>
-                </div> 
-                <div class="col-md-6 col-lg-4 branding">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/branding-2.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">  
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/branding-2.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">BRANDING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                     
-                </div> 
-                <div class="col-md-6 col-lg-4 branding new">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/branding-3.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">   
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/branding-3.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">BRANDING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                    
-                </div> 
-                <div class="col-md-6 col-lg-4 branding">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/branding-4.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">                      
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/branding-4.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">BRANDING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                      
-                </div> 
-                <div class="col-md-6 col-lg-4 branding">
-                    <div class="portfolio-item">
-                        <img src="static/imgs/branding-5.jpg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">          
-                        <div class="content-holder">
-                            <a class="img-popup" href="static/imgs/branding-5.jpg"></a>
-                            <div class="text-holder">
-                                <h6 class="title">BRANDING</h6>
-                                <p class="subtitle">Expedita corporis doloremque velit in totam!</p>
-                            </div>
-                        </div>
-                    </div>                                                   
-                </div>
-            </div>   
-        </div>            
-    </section>
-    <!-- End of portfolio section -->
-    <!--TERMINA ACA LAS IMAGENES-->
-
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>             
+    <!-- End of Portfolio Section -->
 
     <!-- Blog Section -->
-    <section class="section" id="blog">
+    <section class="section" id="experiences">
         <div class="container">
             <h6 class="section-title mb-0 text-center">Experiencias Incluidas</h6>
-            <h6 class="section-subtitle mb-5 text-center">con la compra de uno de los siguientes paquetes.</h6>
+            <h6 class="section-subtitle mb-5 text-center">con tu alquiler de una cabaña Nordika.</h6>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card border-0 mb-4">
-                        <img src="static/imgs/blog-1.jpg" alt="" class="card-img-top w-100">
-                        <div class="card-body">                         
-                            <h6 class="card-title">PAQUETE 1</h6>
-                            <p>INFO CUADRO IZQUIERDA </p>
-                            <a href="javascript:void(0)" class="small text-muted">INFORMACION DEL ARTICULO</a>
+            <div id="experiencesCarousel" class="carousel slide" data-ride="carousel" data-interval="3000">
+                <!-- Indicadores -->
+                <ol class="carousel-indicators">
+                    {% for experience in experiences %}
+                        <li data-target="#experiencesCarousel" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
+                    {% endfor %}
+                </ol>
+
+                <!-- Slides - Una tarjeta por slide -->
+                <div class="carousel-inner">
+                    {% for experience in experiences %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <div class="row justify-content-center">
+                                <div class="col-md-6">
+                                    <div class="card border-0 mb-4">
+                                        <img src="{{ url_for('static', filename=experience.src, _external=True) }}" alt="{{ experience.title }}" class="card-img-top w-100">
+                                        <div class="card-body text-center">                         
+                                            <h6 class="card-title">{{ experience.title }}</h6>
+                                            <p>{{ experience.description }}</p>
+                                            <a href="javascript:void(0)" class="small text-muted">{{ experience.subdesc }}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 mb-4">
-                        <img src="static/imgs/blog-2.jpg" alt="" class="card-img-top w-100">
-                        <div class="card-body">                         
-                            <h6 class="card-title">PAQUETE 2</h6>
-                            <p>INFORMACION CUADRO MEDIO</p>
-                            <a href="javascript:void(0)" class="small text-muted">INFORMACION DEL ARTICULO</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 mb-4">
-                        <img src="static/imgs/blog-3.jpg" alt="" class="card-img-top w-100">
-                        <div class="card-body">                         
-                            <h6 class="card-title">PAQUETE 3</h6>
-                            <p>INFO DE CUADRO DERECHO</p>
-                            <a href="javascript:void(0)" class="small text-muted">INFORMACION DEL ARTICULO</a>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -337,117 +181,29 @@
     <!-- End of Blog Section -->
 
     <!-- Testmonial Section -->
-    <section class="section" id="testmonial">
+    <section class="section" id="testimonial">
         <div class="container">
-            <h6 class="section-title text-center mb-0">INFORMACION 9</h6>
-            <h6 class="section-subtitle mb-5 text-center">INFORMACION 1O</h6>
+            <h6 class="section-title text-center mb-0">Comentarios</h6>
+            <h6 class="section-subtitle mb-5 text-center">Lo que dicen nuestros clientes...</h6>
             <div class="row">
-                <div class="col-md-4 my-3 my-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media align-items-center mb-3">
-                                <img class="mr-3" src="static/imgs/avatar.jpg" alt="">
-                                <div class="media-body">
-                                    <h6 class="mt-1 mb-0">NOMBRE 1</h6>
-                                    <small class="text-muted mb-0">INFO NOMBRE 1</small>     
+                {% for testimonial in testimonials %}
+                    <div class="col-md-4 my-3 my-md-0">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="media align-items-center mb-3">
+                                    <img class="mr-3" src="{{ url_for('static', filename=testimonial.src, _external=True) }}" alt="">
+                                    <div class="media-body">
+                                        <h6 class="mt-1 mb-0">{{ testimonial.name }}</h6>
+                                        <small class="text-muted mb-0">{{ testimonial.info }}</small>     
+                                    </div>
                                 </div>
+                                <p class="mb-0">{{ testimonial.opinion }}</p>
                             </div>
-                            <p class="mb-0">OPINION </p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4 my-3 my-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media align-items-center mb-3">
-                                <img class="mr-3" src="static/imgs/avatar-1.jpg" alt="">
-                                <div class="media-body">
-                                    <h6 class="mt-1 mb-0">NOMBRE 2</h6>
-                                    <small class="text-muted mb-0">INFO NOMBRE 2</small>      
-                                </div>
-                            </div>
-                            <p class="mb-0">OPINION 2</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 my-3 my-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="media align-items-center mb-3">
-                                <img class="mr-3" src="static/imgs/avatar-2.jpg" alt="">
-                                <div class="media-body">
-                                    <h6 class="mt-1 mb-0">NOMBRE 3</h6>
-                                    <small class="text-muted mb-0">INFO NOMBRE 3</small>        
-                                </div>
-                            </div>
-                            <p class="mb-0">OPINION 3</p>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
     <!-- End of Testmonial Section -->
-
-    <!-- Contact Section -->
-    <section id="contact" class="section has-img-bg pb-0">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-5 my-3">
-                    <h6 class="mb-0">Phone</h6>
-                    <p class="mb-4">+ 54 11 30557393</p>
-
-                    <h6 class="mb-0">Address</h6>
-                    <p class="mb-4">12345 Fake ST NoWhere AB Country</p>
-
-                    <h6 class="mb-0">Email</h6>
-                    <p class="mb-0">info@website.com</p>
-                    <p></p>
-                </div>
-                <div class="col-md-7">
-                    <form>
-                        <h4 class="mb-4">INFORMACION NUESTRA </h4>
-                        <div class="form-row">
-                            <div class="form-group col-sm-4">
-                                <input type="text" class="form-control text-white rounded-0 bg-transparent" name="name" placeholder="Name">
-                            </div>
-                            <div class="form-group col-sm-4">
-                                <input type="email" class="form-control text-white rounded-0 bg-transparent" name="Email" placeholder="Email">
-                            </div>
-                            <div class="form-group col-sm-4">
-                                <input type="text" class="form-control text-white rounded-0 bg-transparent" name="subject" placeholder="Subject">
-                            </div>
-                            <div class="form-group col-12">
-                                <textarea name="message" id="" cols="30" rows="4" class="form-control text-white rounded-0 bg-transparent" placeholder="Message"></textarea>
-
-                            </div>
-                            <div class="form-group col-12 mb-0">
-                                <button type="submit" class="btn btn-primary rounded w-md mt-3">Enviar</button>
-                            </div>                          
-                        </div>                          
-                    </form>
-                </div>
-            </div>
-            <!-- Page Footer -->
-            <footer class="mt-5 py-4 border-top border-secondary">
-                <p class="mb-0 small" > hecho por </p>     
-            </footer>
-            <!-- End of Page Footer -->  
-        </div>
-    </section>
-	
-	<!-- core  -->
-    <script src="static/vendors/jquery/jquery-3.4.1.js"></script>
-    <script src="static/vendors/bootstrap/bootstrap.bundle.js"></script>
-
-    <!-- bootstrap 3 affix -->
-	<script src="static/vendors/bootstrap/bootstrap.affix.js"></script>
-
-    <!-- Isotope -->
-    <script src="static/vendors/isotope/isotope.pkgd.js"></script>
-
-    <!-- LeadMark js -->
-    <script src="static/js/leadmark.js"></script>
-
-</body>
-</html>
+{% endblock %}
