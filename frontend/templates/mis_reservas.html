@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Reservas{% endblock %}
+
+{% block content %}
+<nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
+    <div class="container">
+        <a style="scroll-behavior: smooth;" class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{url_for('static', filename='imgs/logo.svg', _external=True)}}" alt="">
+        </a>
+        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+<header class="header" id="header" style="transition: background-image 1s; background: url({{url_for('static', filename='imgs/header.jpg', _external=True)}}) no-repeat center center; background-size: cover">
+    <div class="overlay">
+        <h1 class="title">Buscar Reserva</h1>
+        <form action="/mis_reservas" method="POST" class="reservation-search-form" onsubmit="return validateForm()">
+            <input id="reservation-id" name="reservation_id" placeholder="Coloque el ID de su reserva aquí" required>
+            <button class="btn-primary" id="search-button" type="submit">Buscar</button>
+        </form>
+    </div>  
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert alert-dismissible fade show" role="alert">
+            {% for category, message in messages %}
+                <div class="alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+{% if datos %}
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <h2>Tu reserva: </h2>
+            <p><strong>ID de Reserva: </strong>{{ datos.id_reserva }}</p>
+            <p><strong>Fecha de Check-In: </strong>{{ datos.fecha_checkin }}</p>
+            <p><strong>Fecha de Check-Out: </strong>{{ datos.fecha_checkout }}</p>
+            <p><strong>Cabaña elegida: </strong>{{ datos.cabaña }}</p>
+            <p><strong>Estado: </strong>{{ datos.estado_reserva }}</p>
+            <p><strong>Cantidad de pasajeros: </strong>{{ datos.cantidad_pasajeros }}</p>
+            <p><strong>Cantidad de noches: </strong>{{ datos.cantidad_noches }}</p>
+            {% if datos.estado_reserva == 'confirmada' %}
+                <p><strong>Total pagado: </strong>${{ datos.total }}</p>
+            {% elif datos.estado_reserva == 'cancelada' %}
+                <p><strong>Total reembolsado: </strong>${{ datos.total }}</p>
+            {% elif datos.estado_reserva == 'pendiente' %}
+                <p><strong>Total a pagar: </strong>${{ datos.total }}</p>
+            {% endif %}
+            <p><strong>Cabaña a nombre de: </strong>{{ datos.nombre }}</p>
+            {% if datos.estado_reserva != 'cancelada' %}
+                <form method="POST" action="/cancelar/{{ datos.id_reserva }}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');">
+                    <button class="btn-danger" type="submit">Cancelar Reserva</button>
+                </form>
+            {% elif datos.estado_reserva == 'cancelada' %}
+                <h5>La reserva ya ha sido cancelada.</h5>
+            {% endif %}
+        </div>
+    </section>
+{% elif datos is false %}
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <h2>No se encontró ninguna reserva con el ID proporcionado.</h2>
+            <p>Por favor, verifique el ID de la reserva o intente nuevamente.</p>
+            <a href="{{ url_for('mis_reservas') }}" class="btn btn-primary">Volver a intentar</a>
+        </div>
+    </section>
+{% elif datos is none %}
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <h2>Por favor, ingrese un ID de reserva para buscar.</h2>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

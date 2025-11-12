@@ -1,6 +1,9 @@
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, flash, jsonify, redirect, url_for, render_template, request
+import requests
 
 app = Flask(__name__)
+
+URL_BACKEND = "http://localhost:5003"
 
 cabins = [
     {
@@ -148,6 +151,32 @@ def reservar_cabaña(cabin_slug):
     else:
         # Redirigir a la página de reservar general si no encuentra la cabaña
         return redirect(url_for('reservar'))
+
+@app.route('/mis_reservas', methods=['GET', 'POST'])
+def mis_reservas():
+    if request.method == 'GET':
+        return render_template('mis_reservas.html', datos=None)
+    elif request.method == 'POST':
+        id_reserva = request.form.get('reservation_id')
+        response = requests.get(f"{URL_BACKEND}/reservas/{id_reserva}")
+        if response.status_code == 200:
+            datos_reserva = response.json()
+        else:
+            flash('No se pudo encontrar la reserva. Por favor verifique el ID', 'error')
+            datos_reserva = None
+        return render_template('mis_reservas.html', datos=datos_reserva)
+
+
+@app.route('/cancelar/<id_reserva>', methods=['POST'])
+def cancelar_reserva(id_reserva):
+    response = requests.post(f"{URL_BACKEND}/cancelar_reserva/{id_reserva}")
+    if response.status_code == 200:
+        flash('Reserva cancelada correctamente', 'success')
+    else:
+        flash('Hubo un error al cancelar la reserva', 'error')
+    return redirect(url_for('mis_reservas'))
+
+# Ya están listas para conectar con el backend.
 
 if __name__ == '__main__':
     app.run(port= 5002 , debug=True)
