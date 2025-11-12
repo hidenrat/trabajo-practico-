@@ -166,3 +166,78 @@
     width: 24px;
     border-radius: 4px;
 }
+
+/* De acá para abajo, son funciones para el calendario*/
+
+/*Punteros*/
+
+/* FullCalendar usa .fc-daygrid-day-frame.fc-day-other para los días de otros meses */
+.fc-daygrid-day:not(.fc-day-past) {
+    cursor: pointer;
+}
+
+.fc-daygrid-body {
+    cursor: grab;
+}
+.fc-daygrid-body:active {
+    cursor: grabbing;
+}
+
+/* Cursor 'Bloqueado' para días pasados y días fuera del mes actual */
+.fc-day-past, 
+.fc-daygrid-day.fc-day-other {
+    cursor: not-allowed !important;
+}
+
+
+/*Estilos para fechas pasadas al dia de hoy*/
+
+.fc-day-past {
+    background-color: #f0f0f0 !important;
+    opacity: 0.8;
+}
+
+.fc-day-past::after {
+    content: "❌";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.fc-daygrid-day-frame.fc-day-selected {
+    background-color: #4CAF50 !important;
+}
+.fc-daygrid-day.fc-day-selected {
+    background-color: #A5D6A7 !important;
+}
+.fc-highlight {
+    background: #4CAF50 !important;
+    opacity: 0.5 !important;
+}
+
+/*Estilos para dias reservados*/
+
+.reserved-event {
+    background-color: #FF5252 !important;
+    border-color: #D32F2F !important;
+    cursor: not-allowed !important;
+}
+
+.fc-event-title-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc-event-title.reserved-text {
+    color: #424242; 
+    font-weight: bold !important;
+    text-align: center;
+    pointer-events: none; 
+    z-index: 10;
+}

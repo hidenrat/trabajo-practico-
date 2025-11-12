@@ -2,6 +2,8 @@
 
 {% block head_extra %}
     <link rel="stylesheet" href="{{url_for('static', filename='css/reservar.css', _external=True)}}">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    
     <script>
         var disableChangeHeader = true; // Cambia a true en esta página
     </script>
@@ -25,6 +27,7 @@
         </div>
     </div>
 </nav>
+
 <header class="header" id="header" style="transition: background-image 1s; background: url({{url_for('static', filename='imgs/'+ cabin.slug +'-1.jpg', _external=True)}}) no-repeat center center; background-size: cover">
     <div class="overlay">
         <h1 class="subtitle">Reservar</h1>
@@ -45,7 +48,6 @@
                 <h2>{{ cabin.name }}</h2>
                 <p class="lead">{{ cabin.description }}</p>
                 
-                <!-- Carrusel de imágenes -->
                 <div class="cabin-carousel-wrapper mb-4">
                     <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
                         <div class="cabin-carousel-track">
@@ -68,6 +70,9 @@
                         <li>{{ amenity }}</li>
                     {% endfor %}
                 </ul>
+
+                <h4 class="mt-5">Selecciona el rango de fechas</h4>
+                <div id='calendar' class="mb-5"></div>
             </div>
             
             <div class="col-lg-4">
@@ -78,25 +83,31 @@
                         <p><strong>Capacidad:</strong> {{ cabin.capacidad }} personas</p>
                         <p><strong>Precio por noche:</strong> <span class="text-primary font-weight-bold">${{ cabin.precio_por_noche }}</span></p>
                         
-                        <form method="POST" action="">
+                        <form id="reservation-form" method="POST" action="">
+                            <input type="hidden" id="check_in_hidden" name="check_in" required>
+                            <input type="hidden" id="check_out_hidden" name="check_out" required>
+
                             <div class="form-group">
-                                <label for="check_in">Fecha de entrada</label>
-                                <input type="date" class="form-control" id="check_in" name="check_in" required>
+                                <label>Entrada:</label>
+                                <p id="check_in_display" class="font-weight-bold">--</p>
                             </div>
                             <div class="form-group">
-                                <label for="check_out">Fecha de salida</label>
-                                <input type="date" class="form-control" id="check_out" name="check_out" required>
+                                <label>Salida:</label>
+                                <p id="check_out_display" class="font-weight-bold">--</p>
                             </div>
                             <div class="form-group">
                                 <label for="guests">Número de huéspedes</label>
                                 <input type="number" class="form-control" id="guests" name="guests" min="1" max="{{ cabin.capacidad }}" required>
                             </div>
+                            
+                            <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+                            
                             <hr>
                             <div class="d-flex justify-content-between mb-3">
                                 <span>Total estimado:</span>
-                                <span id="total" class="font-weight-bold">$0</span>
+                                <span id="total" class="font-weight-bold text-success">$0</span>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Confirmar Reserva</button>
+                            <button type="submit" id="submit-button" class="btn btn-primary btn-block" disabled>Confirmar Reserva</button>
                         </form>
                     </div>
                 </div>
@@ -107,25 +118,20 @@
 {% endblock %}
 
 {% block scripts_extra %}
-<script>
-    // Calcular total
-    $(document).ready(function() {
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+    <script>
         var pricePerNight = {{ cabin.precio_por_noche }};
         
-        function calculateTotal() {
-            var checkIn = new Date($('#check_in').val());
-            var checkOut = new Date($('#check_out').val());
-            
-            if (checkIn && checkOut && checkOut > checkIn) {
-                var nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-                var total = nights * pricePerNight;
-                $('#total').text('$' + total + ' (' + nights + ' noches)');
-            } else {
-                $('#total').text('$0');
-            }
-        }
-        
-        $('#check_in, #check_out').on('change', calculateTotal);
-    });
-</script>
+        //Si el backend ya pasa la variable 'real_reserved_dates', usa la línea de abajo.
+
+        // kkkkkkkkkkkkkkkkkkkk- var reservedDates = real_reserved_dates | tojson }};
+
+        //Por ahora, usamos estos como ejemplo
+        var reservedDates = [
+            { title: 'Reservado', start: '2025-12-10', end: '2025-12-15', display: 'block', color: '#FF5252', className: 'reserved-event' },
+            { title: 'Reservado', start: '2025-12-24', end: '2025-12-28', display: 'block', color: '#FF5252', className: 'reserved-event' },
+        ];
+    </script>
+    <script src="{{ url_for('static', filename='js/reservar-logica.js', _external=True) }}"></script>
 {% endblock %}
