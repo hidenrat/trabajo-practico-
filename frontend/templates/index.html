@@ -29,7 +29,7 @@
                         <a class="nav-link" href="#contact">Contacto</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('reservar') }}" class="ml-4 nav-link btn btn-primary btn-sm rounded">Reservar Cabaña</a>
+                        <a href="{{ url_for('cabañas') }}" class="ml-4 nav-link btn btn-primary btn-sm rounded">Reservar Cabaña</a>
                     </li>
                 </ul>
             </div>
@@ -166,7 +166,7 @@
                                         <img src="{{ url_for('static', filename=experience.src, _external=True) }}" alt="{{ experience.title }}" class="card-img-top w-100">
                                         <div class="card-body text-center">                         
                                             <h6 class="card-title">{{ experience.title }}</h6>
-                                            <p>{{ experience.description }}</p>
+                                            <p>Para max. {{ experience.capacidad }} personas.</p>
                                             <a href="javascript:void(0)" class="small text-muted">{{ experience.subdesc }}</a>
                                         </div>
                                     </div>

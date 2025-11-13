@@ -3,6 +3,11 @@ $(document).ready(function() {
     // en el HTML antes de que este script se cargue.
     
     var checkInDate, checkOutDate;
+    // Cuando el calendario dispara `unselect`, por defecto no queremos
+    // limpiar el formulario — queremos que la selección persista hasta
+    // que el usuario seleccione otro rango o ocurra un solapamiento.
+    // Usamos esta bandera para indicar cuándo `unselect` debe limpiar.
+    var clearOnUnselect = false;
 
     function calculateTotal(checkIn, checkOut) {
         var d_in = new Date(checkIn);
@@ -13,9 +18,11 @@ $(document).ready(function() {
             // pricePerNight se usa como variable global
             var total = nights * pricePerNight; 
             $('#total').text('$' + total + ' (' + nights + ' noches)');
+            $('#input-total').val(total);
             return true;
         } else {
             $('#total').text('$0');
+            $('#input-total').val(0);
             return false;
         }
     }
@@ -28,10 +35,6 @@ $(document).ready(function() {
         $('#submit-button').prop('disabled', true);
         $('#error-message').hide().text('');
         $('#total').text('$0');
-        var calendarEl = document.getElementById('calendar');
-        if (calendarEl && calendarEl.fullCalendar) {
-            calendarEl.fullCalendar('unselect');
-        }
     }
 
     var calendarEl = document.getElementById('calendar');
@@ -58,7 +61,12 @@ $(document).ready(function() {
         },
 
         select: function(info) {
-            resetForm();
+            // No limpiamos el formulario entero aquí para evitar que un
+            // siguiente click lo borre; solo ocultamos errores previos.
+            $('#error-message').hide().text('');
+
+            // Marcamos que, por defecto, al deseleccionar NO se debe limpiar.
+            clearOnUnselect = false;
 
             var rangeStart = info.startStr;
             var rangeEnd_FC = info.end; 
@@ -78,6 +86,9 @@ $(document).ready(function() {
 
             if (isOverlapping) {
                 $('#error-message').text('🚫 La selección se solapa con una reserva existente.').show();
+                // Queremos que en este caso la deselección LIMPIE el formulario,
+                // así que activamos la bandera y llamamos a unselect.
+                clearOnUnselect = true;
                 calendar.unselect();
                 return;
             }
@@ -95,14 +106,35 @@ $(document).ready(function() {
 
             calculateTotal(checkInDate, rangeEnd);
         },
-        
+
         unselect: function() {
-            resetForm();
+            // Solo limpiar si algo pidió explícitamente la limpieza.
+            if (clearOnUnselect) {
+                resetForm();
+                clearOnUnselect = false;
+            }
+            // Si clearOnUnselect es false, mantenemos la selección y el formulario.
         }
     });
 
     calendar.render();
     
+    // Maneja el botón de cancelar selección: deselecciona el calendario
+    // y limpia el formulario. Usamos la bandera `clearOnUnselect` para
+    // permitir que el handler `unselect` realice la limpieza sin provocar
+    // recursión accidental.
+    $('#cancel-selection').on('click', function() {
+        clearOnUnselect = true;
+        // Llamamos a la API de FullCalendar v5 para deseleccionar.
+        if (typeof calendar !== 'undefined' && calendar) {
+            calendar.unselect();
+        } else {
+            // Por seguridad, si no hay calendario aún, limpiamos directamente.
+            resetForm();
+            clearOnUnselect = false;
+        }
+    });
+
     $('#guests').on('change', function() {
         if ($('#check_in_hidden').val() && $('#check_out_hidden').val()) {
             calculateTotal($('#check_in_hidden').val(), $('#check_out_hidden').val());

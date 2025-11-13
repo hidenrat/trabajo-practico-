@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Ingresar Datos - Nordika Cabins{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/ingreso_datos.css', _external=True)}}">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
+    <div class="container">
+        <a style="scroll-behavior: smooth;" class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{url_for('static', filename='imgs/logo.svg', _external=True)}}" alt="">
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">                     
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('cabañas') }}">Todas las Cabañas</a>
+                </li>
+            </ul>
+        </div>
+        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+<br>
+<br>
+<br>
+<br>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4">Ingrese sus datos</h2>
+            <form method="POST" action="{{ url_for('enviar_mail') }}">
+                <div>
+                    <input type="hidden" name="cabin_slug" value="{{ datos.cabin_slug }}">
+                    <input type="hidden" name="check_in" value="{{ datos.check_in }}">
+                    <input type="hidden" name="check_out" value="{{ datos.check_out }}">
+                    <input type="hidden" name="cant_personas" value="{{ datos.cant_personas }}">
+                </div>
+                <div class="form-group">
+                    <label for="cabin_slug">Cabaña</label>
+                    {% for cabin in cabañas %}
+                        {% if cabin.slug == datos.cabin_slug %}
+                            <input type="text" class="form-control" id="cabin_name" name="cabin_name" value="{{ cabin.name }}" readonly>
+                        {% endif %}
+                    {% endfor %}
+                    <label for="check_in">Fecha de Entrada</label>
+                    <input type="text" class="form-control" id="check_in" name="check_in" value="{{ datos.check_in }}" readonly>
+                    <label for="check_out">Fecha de Salida</label>
+                    <input type="text" class="form-control" id="check_out" name="check_out" value="{{ datos.check_out }}" readonly>
+                    <label for="cant_personas">Cantidad de Personas</label>
+                    <input type="text" class="form-control" id="cant_personas" name="cant_personas" value="{{ datos.cant_personas }}" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Número de Teléfono</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono" required>
+                </div>
+                <div class="form-group">
+                    <label for="documento">Número de Documento</label>
+                    <input type="text" class="form-control" id="documento" name="documento" required>
+                </div>
+                <div class="form-group">
+                    <label for="experiencias">Desea agregar alguna experiencia (extra)?</label>
+                    <br>
+                    {% for experiencia in experiencias %}
+                        <label class="experiencia-item">
+                            
+                            <input type="checkbox" class="experiencia" name="experiencias" value="{{ experiencia.title }}" data-precio="{{ experiencia.precio }}">
+                            
+                            <span class="circle"></span>
+                            
+                            <span class="experiencia-title">{{ experiencia.title }} - ${{ experiencia.precio }}</span>
+                        </label>
+                        <br>
+                    {% endfor %}
+                </div>
+                <div>
+                    <label for="metodo">Método de Pago</label>
+                    <select class="form-control" id="metodo" name="metodo" required>
+                        <option value="tarjeta">Tarjeta de Crédito/Débito</option>
+                        <option value="transferencia">Transferencia Bancaria</option>
+                        <option value="mercado">Mercado Pago</option>
+                        <option value="efectivo">Efectivo</option>
+                    </select>
+                </div>
+                <br>
+                <div id="total_reserva">Total: ${{ datos.total }}</div>
+                <input type="hidden" id="total" name="total" value="{{ datos.total }}">
+                <br>
+                <button type="button" id="confirmarBtn" class="btn btn-primary btn-block">Confirmar Reserva</button>
+                <br><br>
+                <div id="popupConfirmacion" class="popup-container">
+                    <div class="popup-content">
+                        <h3>¿Estás seguro de confirmar la reserva?</h3>
+                        <p>Una vez confirmada, serás redirigido al inicio y recibirás un correo con los datos de la reserva.</p>
+                        <button id="confirmarReserva" class="btn btn-success">Confirmar</button>
+                        <button id="cancelarReserva" class="btn btn-danger">Cancelar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script>
+        // Inicializar el precio total con el valor proveniente del backend (asegurándose que es un número)
+        let total_reserva = parseFloat("{{ datos.total }}"); // Aseguramos que es un número flotante
+
+        // Función para actualizar el total
+        function actualizarTotal() {
+            // Obtener todos los checkboxes seleccionados
+            let checkboxes = document.querySelectorAll('.experiencia:checked');
+            
+            // Calcular el precio total de las experiencias seleccionadas
+            let totalExperiencias = 0;
+            checkboxes.forEach(function(checkbox) {
+                // Sumar el precio de cada experiencia seleccionada, usando 'data-precio'
+                totalExperiencias += parseFloat(checkbox.getAttribute('data-precio'));
+            });
+            
+            // Calcular el nuevo total sumando las experiencias seleccionadas al total base
+            let nuevoTotal = total_reserva + totalExperiencias;
+            
+            // Mostrar el nuevo total en el div con id 'total_reserva'
+            document.getElementById('total_reserva').textContent = 'Total: $' + nuevoTotal.toFixed(2); // Se usa .toFixed(2) para mostrar solo 2 decimales
+            
+            // Actualizar el valor del input oculto con el nuevo total (sin el símbolo '$')
+            let totalInput = document.getElementById('total');
+            totalInput.value = nuevoTotal.toFixed(2);  // Guardar el total sin formato de moneda
+        }
+
+        // Asignar un evento a cada checkbox para actualizar el total cuando se marca/desmarca
+        document.querySelectorAll('.experiencia').forEach(function(checkbox) {
+            checkbox.addEventListener('change', actualizarTotal);
+        });
+
+        // Llamar a la función al cargar la página para asegurar que el total inicial se muestra correctamente
+        actualizarTotal();
+    </script>
+
+{% endblock %}

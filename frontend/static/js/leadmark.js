@@ -330,3 +330,59 @@ $(document).ready(function() {
     });
 });
 
+window.onload = function() {
+    // Mostrar el loader mientras se carga la página
+    document.getElementById('loader').style.visibility = 'visible';
+    
+    // Simula que la página está cargando
+    setTimeout(function() {
+        // Ocultar el loader después de 3 segundos (simulando carga)
+        document.getElementById('loader').style.visibility = 'hidden';
+        
+        // Mostrar el contenido de la página
+        document.getElementById('content').style.display = 'block';
+    }, 1700); // 1.7 segundos de simulación de carga
+};
+
+document.querySelectorAll('.experiencia-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        const checkbox = this.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;  // Cambiar el estado del checkbox
+
+        // Llamar a la función de actualización del total si es necesario
+        actualizarTotal();
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Obtener los elementos
+    const confirmarBtn = document.getElementById("confirmarBtn");
+    const popupConfirmacion = document.getElementById("popupConfirmacion");
+    const confirmarReserva = document.getElementById("confirmarReserva");
+    const cancelarReserva = document.getElementById("cancelarReserva");
+
+    // Al hacer clic en "Confirmar Reserva", mostrar el popup
+    confirmarBtn.addEventListener("click", function(event) {
+        // Evitar que el formulario se envíe automáticamente
+        event.preventDefault();
+
+        // Mostrar el popup
+        popupConfirmacion.style.display = "flex";
+    });
+
+    // ✅ Solo al confirmar se hace la redirección
+    confirmarReserva.addEventListener("click", function() {
+
+        // Redirigir al inicio
+        window.location.href = "/";
+
+        // Ocultar el popup (opcional, ya que se redirige)
+        popupConfirmacion.style.display = "none";
+    });
+
+    // ❌ Al cancelar, solo se cierra el popup, sin redirigir
+    cancelarReserva.addEventListener("click", function(event) {
+        event.preventDefault(); // Evita cualquier acción por defecto
+        popupConfirmacion.style.display = "none"; // Solo cerrar
+    });
+});

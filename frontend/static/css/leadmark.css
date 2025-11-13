@@ -11894,5 +11894,123 @@ video {
 
 .btn-primary {
   width: 150px;
-  height: 40px;
+}
+
+/* Estilos para el contenedor de la pantalla de carga */
+.loader-container {
+    position: fixed; /* Fija la posición en toda la pantalla */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Ocupa toda la pantalla */
+    height: 100vh; /* Ocupa toda la pantalla */
+    background: white; /* Fondo blanco */
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    z-index: 9999; /* Asegura que el loader esté por encima de otros elementos */
+    visibility: visible; /* Inicialmente visible */
+}
+
+/* Estilos para el spinner (la circunferencia que gira) */
+.spinner {
+    border: 4px solid #f3f3f3; /* Color gris claro para el fondo del círculo */
+    border-top: 4px solid orange; /* Color naranja para la parte superior */
+    border-radius: 50%; /* Hace que sea un círculo */
+    width: 50px; /* Tamaño del círculo */
+    height: 50px; /* Tamaño del círculo */
+    animation: spin 1s linear infinite; /* Animación de giro */
+}
+
+/* Animación del spinner (giro) */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg); /* Inicia en 0 grados */
+    }
+    100% {
+        transform: rotate(360deg); /* Rota 360 grados */
+    }
+}
+
+/* Ocultar los checkbox originales */
+input[type="checkbox"].experiencia {
+    display: none; /* Ocultar el checkbox real */
+}
+
+/* Estilo para los círculos */
+.experiencia-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer; /* Cambia el cursor al pasar sobre el texto o círculo */
+}
+
+/* El círculo naranja */
+.experiencia-item .circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid orange;
+    margin-right: 10px;
+    background-color: white;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Estilo para el texto de la experiencia */
+.experiencia-item .experiencia-title {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Cuando el checkbox está marcado, cambiamos el color del círculo */
+input[type="checkbox"].experiencia:checked + .circle {
+    background-color: orange;
+    border-color: darkorange;
+}
+
+/* También cambia el color del texto cuando está seleccionado */
+input[type="checkbox"].experiencia:checked + .circle + .experiencia-title {
+    color: orange;
+    transition: color 0.3s;
+}
+
+/* Estilos para el fondo de la ventana emergente */
+.popup-container {
+    position: fixed; /* Fija la posición */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* Fondo oscuro semi-transparente */
+    display: none; /* Inicialmente oculta */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Asegura que el popup esté por encima de otros elementos */
+}
+
+/* Estilos del contenido de la ventana emergente */
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+}
+
+/* Estilo de los botones de la ventana emergente */
+.popup-content button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Botón de confirmación (verde) */
+#confirmarReserva {
+    background-color: green;
+    color: white;
+}
+
+/* Botón de cancelar (rojo) */
+#cancelarReserva {
+    background-color: red;
+    color: white;
 }

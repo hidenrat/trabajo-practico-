@@ -8,14 +8,16 @@
     
     <title>{% block title %}Nordika Cabins{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/ti-icons/css/themify-icons.css', _external=True) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/themify-icons/css/themify-icons.css', _external=True) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/leadmark.css', _external=True) }}">
 
     {% block head_extra %}{% endblock %}
 
 </head>
 <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
-
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+    </div>
     {% block content %}
     
     {% endblock %}

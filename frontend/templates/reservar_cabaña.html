@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %}Reservar {{ cabin.name }} - Nordika Cabins{% endblock %}
+
 {% block head_extra %}
     <link rel="stylesheet" href="{{url_for('static', filename='css/reservar.css', _external=True)}}">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
@@ -21,7 +23,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">                     
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('reservar') }}">Todas las Cabañas</a>
+                    <a class="nav-link" href="{{ url_for('cabañas') }}">Todas las Cabañas</a>
                 </li>
             </ul>
         </div>
@@ -82,8 +84,8 @@
                         <hr>
                         <p><strong>Capacidad:</strong> {{ cabin.capacidad }} personas</p>
                         <p><strong>Precio por noche:</strong> <span class="text-primary font-weight-bold">${{ cabin.precio_por_noche }}</span></p>
-                        
-                        <form id="reservation-form" method="POST" action="">
+
+                        <form id="reservation-form" method="POST" action="{{ url_for('reservar_cabaña', cabin_slug=cabin.slug) }}">
                             <input type="hidden" id="check_in_hidden" name="check_in" required>
                             <input type="hidden" id="check_out_hidden" name="check_out" required>
 
@@ -106,6 +108,7 @@
                             <div class="d-flex justify-content-between mb-3">
                                 <span>Total estimado:</span>
                                 <span id="total" class="font-weight-bold text-success">$0</span>
+                                <input type="hidden" id="input-total" name="total" value="0">
                             </div>
                             <button type="submit" id="submit-button" class="btn btn-primary btn-block" disabled>Confirmar Reserva</button>
                         </form>

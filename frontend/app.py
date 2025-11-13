@@ -1,10 +1,21 @@
 import os
-from flask import Flask, flash, jsonify, redirect, url_for, render_template, request
+from flask import Flask, flash, jsonify, redirect, url_for, render_template, request, session
 import requests
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 # SECRET_KEY is required for sessions/flash to work. Prefer setting it via environment in production.
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_change_me')
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_DEFAULT_SENDER'] = 'practicotrabajo74@gmail.com'
+app.config['MAIL_USERNAME'] = 'practicotrabajo74@gmail.com'
+app.config['MAIL_PASSWORD'] = 'vsug hlcz dpin dwvn'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail= Mail(app)
 
 URL_BACKEND = "http://localhost:5003"
 
@@ -76,45 +87,51 @@ cabins = [
 
 experiencias = [{
             "title": "Aventura en el bosque",
-            "description": "Para max. 5 personas.",
+            "capacidad": 5,
             "subdesc": """Un circuito por los bosques que rodean las cabañas; compuesto por puentes flotantes y cascadas naturales a cada paso de la experiencia. 
             No te pierdas esta experiencia inolvidable. Alquilá tu cabaña Nordika.""",
-            "src": "imgs/experiencia-1.jpg"
+            "src": "imgs/experiencia-1.jpg",
+            "precio": 400
         },
         {
             "title": "Paseo natural",
-            "description": "Para max. 6 personas.",
+            "capacidad": 6,
             "subdesc": """Un recorrido por senderos rodeados de flora nativa, con paradas en miradores naturales.
             Disfrutá de la tranquilidad y belleza del entorno. Alquilá tu cabaña Nordika.""",
-            "src": "imgs/experiencia-2.jpg"
+            "src": "imgs/experiencia-2.jpg",
+            "precio": 300
         },
         {
             "title": "Trekking por las montañas",
-            "description": "Para max. 4 personas.",
+            "capacidad": 3,
             "subdesc": """Una experiencia de trekking que te llevará a través de paisajes montañosos impresionantes. 
             Conectá con la naturaleza y disfrutá de vistas inolvidables. Alquilá tu cabaña Nordika.""",
-            "src": "imgs/experiencia-3.jpg"
+            "src": "imgs/experiencia-3.jpg",
+            "precio": 650
         },
         {
             "title": "Meditación en el bosque",
-            "description": "Para max. 4 personas.",
+            "capacidad": 3,
             "subdesc": """Una experiencia de mindfulness en medio del bosque, donde podrás conectarte con la naturaleza y disfrutar de un profundo momento de paz y tranquilidad. 
             Perfecta para relajarte y desconectar del estrés. Alquilá tu cabaña Nordika y vive la calma del bosque.""",
-            "src": "imgs/experiencia-4.jpg"
+            "src": "imgs/experiencia-4.jpg",
+            "precio": 160
         },
         {
             "title": "Paseo nocturno en el bosque",
-            "description": "Para max. 4 personas.",
+            "capacidad": 4,
             "subdesc": """Vive la magia del bosque de noche, con una experiencia nocturna que te llevará a explorar los sonidos y las vistas bajo las estrellas. Escucha el crujir de las hojas y los murmullos del viento mientras te adentras en la oscuridad tranquila del bosque. 
             Una experiencia única para aquellos que buscan una conexión más profunda con la naturaleza. Alquilá tu cabaña Nordika y prepárate para una aventura bajo el cielo estrellado.""",
-            "src": "imgs/experiencia-5.jpg"
+            "src": "imgs/experiencia-5.jpg",
+            "precio": 220
         },
         {
             "title": "Paseo en barco por el río del bosque",
-            "description": "Para max. 6 personas.",
+            "capacidad": 6,
             "subdesc": """Disfruta de un tranquilo paseo en barco o canoa por los ríos y lagos que rodean el bosque. Observa la fauna local y relájate mientras navegas entre los árboles, explorando paisajes inaccesibles por tierra. 
             Vive la serenidad del agua y la naturaleza. Alquilá tu cabaña Nordika y prepárate para una experiencia única en el bosque.""",
-            "src": "imgs/experiencia-6.jpg"
+            "src": "imgs/experiencia-6.jpg",
+            "precio": 700
         }
     ]
 
@@ -142,12 +159,27 @@ def index():
 ]
     return render_template('index.html', cabins=cabins, experiences=experiencias, testimonials=comentarios)
 
-@app.route('/reservar')
-def reservar():
-    return render_template('reservar.html', cabins=cabins)
+@app.route('/cabañas')
+def cabañas():
+    return render_template('nuestras_cabañas.html', cabins=cabins)
                            
-@app.route('/reservar/<cabin_slug>')
+@app.route('/reservar/<cabin_slug>', methods=['GET', 'POST'])
 def reservar_cabaña(cabin_slug):
+    if request.method == 'POST':
+        check_in = request.form.get('check_in')
+        check_out = request.form.get('check_out')
+        cant_personas = request.form.get('guests')
+        total = request.form.get('total')
+
+        session['reservation'] = {
+            'cabin_slug': cabin_slug,
+            'check_in': check_in,
+            'check_out': check_out,
+            'cant_personas': int(cant_personas),
+            'total': int(total)
+        }
+        return redirect(url_for('datos_reserva'))
+
     cabin = next((c for c in cabins if c['slug'] == cabin_slug), None)
     if cabin:
         return render_template('reservar_cabaña.html', cabin=cabin)
@@ -183,7 +215,54 @@ def cancelar_reserva():
 
     return redirect(url_for('mis_reservas', id=id_reserva))
 
-# Ya están listas para conectar con el backend.
+@app.route('/datos_reserva', methods=['GET', 'POST'])
+def datos_reserva():
+    if request.method == 'POST':
+        # Enviar datos al backend a implementar
+        return redirect(url_for('index'))
+    datos = session.get('reservation')
+    if not datos or not datos.get("check_in") or not datos.get("check_out") or not datos.get("cant_personas"):
+        flash('Por favor, complete todos los campos de la reserva.', 'error')
+        return redirect(url_for('reservar', cabin_slug=datos["cabin_slug"]))
+    return render_template('ingreso_datos.html', datos=datos, cabañas=cabins, experiencias=experiencias)
+
+@app.route('/enviar_mail', methods=['POST'])
+def enviar_mail():
+    for cabaña in cabins:
+        if cabaña['slug'] == request.form.get('cabin_slug'):
+            cabaña_nombre = cabaña['name']
+            break
+    check_in = request.form.get('check_in')
+    check_out = request.form.get('check_out')
+    cant_personas = request.form.get('cant_personas')
+    experiencias = request.form.getlist('experiencias')
+    total = request.form.get('total')
+    nombre = request.form.get('nombre')
+    email = request.form.get('email')
+    telefono = request.form.get('telefono')
+
+    # Crear el mensaje de correo
+    msg = Message('Confirmación de Reserva',
+                  sender='practicotrabajo74@gmail.com',
+                  recipients=[email])  # Correo del cliente
+
+    # Renderizar el template HTML del correo
+    msg.html = render_template('confirmacion_reserva_email.html',
+                               cabin_slug=cabaña_nombre,
+                               check_in=check_in,
+                               check_out=check_out,
+                               cant_personas=cant_personas,
+                               experiencias=experiencias,
+                               total=total,
+                               nombre=nombre,
+                               email=email,
+                               telefono=telefono)
+
+    try:
+        mail.send(msg)
+    except Exception as e:
+        print("Error al enviar el correo:", e)
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(port= 5002 , debug=True)
