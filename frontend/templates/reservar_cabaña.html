@@ -47,12 +47,14 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
+                
                 <h2>{{ cabin.name }}</h2>
                 <p class="lead">{{ cabin.description }}</p>
                 
                 <div class="cabin-carousel-wrapper mb-4">
                     <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
                         <div class="cabin-carousel-track">
+                            
                             {% for img in cabin.images %}
                                 <div class="cabin-carousel-item">
                                     <img src="{{url_for('static', filename=img.src, _external=True)}}" alt="{{ img.title }}">
@@ -63,9 +65,14 @@
                                 </div>
                             {% endfor %}
                         </div>
+                        
                     </div>
                 </div>
-
+                <div class="mapa">
+                    <h4>{{ cabin.ubicacion }}</h4>
+                    <iframe src="{{ cabin.ubicacion_mapa }}" style="height: 250px; width: 80%"></iframe>
+                </div>
+                
                 <h4>Comodidades</h4>
                 <ul>
                     {% for amenity in cabin.ammenities.split(', ') %}

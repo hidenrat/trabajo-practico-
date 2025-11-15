@@ -23,7 +23,9 @@ cabins = [
     {
         "name": "Mirador del Sol",
         "slug": "mirador-sol",
-        "images": [
+        "ubicacion": "camping Splash",
+        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25646.533083070197!2d-56.708145498142464!3d-36.53441789556365!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x959c13b25808c597%3A0xe99286d15d09f144!2sCamping%20Splash!5e0!3m2!1ses!2sar!4v1763237766813!5m2!1ses!2sar",
+        "images" :[
             {"src": "imgs/mirador-sol-1.jpg", "title": "Mirador del Sol", "subtitle": "Vista panorámica"},
             {"src": "/imgs/mirador-sol-2.jpg", "title": "Mirador del Sol", "subtitle": "Interior cálido"},
             {"src": "/imgs/mirador-sol-3.jpg", "title": "Mirador del Sol", "subtitle": "Terraza elevada"},
@@ -40,6 +42,8 @@ cabins = [
     {
         "name": "Bosque Vivo",
         "slug": "bosque-vivo",
+        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25554.244290573894!2d-71.7442604347737!3d-36.811796947138724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x966ec5f70bbb576b%3A0x717ebbf62152bfed!2sBosque%20Vivo!5e0!3m2!1ses!2sar!4v1763241520821!5m2!1ses!2sar",
+        "ubicacion": "Sector Bosque Alegre",
         "images": [
             {"src": "/imgs/bosque-vivo-1.jpg", "title": "Bosque Vivo", "subtitle": "Rodeada de árboles"},
             {"src": "/imgs/bosque-vivo-2.jpg", "title": "Bosque Vivo", "subtitle": "Luz natural"},
@@ -55,6 +59,8 @@ cabins = [
     {
         "name": "Rincón Lunar",
         "slug": "rincon-lunar",
+        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3267.2918101606288!2d-57.53728665411472!3d-35.024429028768374!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a267bb9d4928c9%3A0x7f95e094db03db05!2sDescanso%20Atalaya!5e0!3m2!1ses!2sar!4v1763241962633!5m2!1ses!2sar",
+        "ubicacion": "Descanso Atalaya",
         "images": [
             {"src": "/imgs/rincon-lunar-1.jpg", "title": "Rincón Lunar", "subtitle": "Cielo nocturno"},
             {"src": "/imgs/rincon-lunar-2.jpg", "title": "Rincón Lunar", "subtitle": "Interior acogedor"},
@@ -69,7 +75,9 @@ cabins = [
     },
     {
         "name": "Río Nativo",
-        "slug": "rio-nativo",
+        "ubicacion": "Sector Río Sereno",
+        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6588613.381292173!2d-72.0925612671353!3d-36.26143902599086!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x966e957143b1cb5f%3A0x68acacb929e6c860!2sHostal%20junta%20Los%20Rios!5e0!3m2!1ses!2sar!4v1763242150058!5m2!1ses!2sar",
+        "slug": "Hostal junta Los Rios",
         "images": [
             {"src": "/imgs/rio-nativo-1.jpg", "title": "Río Nativo", "subtitle": "Junto al agua"},
             {"src": "/imgs/rio-nativo-2.jpg", "title": "Río Nativo", "subtitle": "Deck exterior"},
