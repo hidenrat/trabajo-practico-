@@ -47,14 +47,11 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
-                
-                <h2>{{ cabin.name }}</h2>
                 <p class="lead">{{ cabin.description }}</p>
                 
                 <div class="cabin-carousel-wrapper mb-4">
                     <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
                         <div class="cabin-carousel-track">
-                            
                             {% for img in cabin.images %}
                                 <div class="cabin-carousel-item">
                                     <img src="{{url_for('static', filename=img.src, _external=True)}}" alt="{{ img.title }}">
@@ -65,12 +62,11 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        
                     </div>
                 </div>
                 <div class="mapa">
-                    <h4>{{ cabin.ubicacion }}</h4>
-                    <iframe src="{{ cabin.ubicacion_mapa }}" style="height: 250px; width: 80%"></iframe>
+                    <h2>{{ cabin.ubicacion_nombre }}</h2>
+                    <iframe src="{{ cabin.ubicacion_mapa }}"></iframe>
                 </div>
                 
                 <h4>Comodidades</h4>
@@ -79,7 +75,15 @@
                         <li>{{ amenity }}</li>
                     {% endfor %}
                 </ul>
-
+                <br>
+                <h5><strong>Metros Cuadrados:</strong> {{ cabin.metros_cuadrados }} m²</h5>
+                <br>
+                <h5><strong>Baños:</strong> {{ cabin.baños }}</h5>
+                <br>
+                <h5><strong>Dormitorios:</strong> {{ cabin.dormitorios }}</h5>
+                <br>
+                <h5><strong>¿Acepta Mascotas?</strong> {% if cabin.PetFriendly %}Sí{% else %}No{% endif %}</h5>
+                <br>
                 <h4 class="mt-5">Selecciona el rango de fechas</h4>
                 <div id='calendar' class="mb-5"></div>
             </div>
@@ -89,6 +93,7 @@
                     <div class="card-body">
                         <h4 class="card-title">Detalles de Reserva</h4>
                         <hr>
+                        <p><strong>Cabaña:</strong> {{ cabin.name }}</p>
                         <p><strong>Capacidad:</strong> {{ cabin.capacidad }} personas</p>
                         <p><strong>Precio por noche:</strong> <span class="text-primary font-weight-bold">${{ cabin.precio_por_noche }}</span></p>
 

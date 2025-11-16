@@ -21,10 +21,6 @@ def get_cabanas():
     return jsonify(cabanas)
 
 #Datos simulados de reservas
-reservas = [
-        {"id": 1, "cabaña": "Mirador del Sol", "fecha_checkin": "2024-07-01", "fecha_checkout": "2024-07-05", "estado_reserva": "Confirmada"},
-        {"id": 2, "cabaña": "Bosque Vivo", "fecha_checkin": "2024-08-10", "fecha_checkout": "2024-08-15", "estado_reserva": "Cancelada"},
-    ]
 
 @app.route('/api/reservas/cliente/<int:id_cliente>', methods=['GET']) #Registra la ruta /api/reservas/cliente/<id_cliente> como un endpoint GET en Flask.<int:id_cliente> captura un entero desde la URL y lo pasa como argumento id_cliente a la función.
 def obtener_reservas_cliente(id_cliente):
@@ -96,7 +92,16 @@ def cancelar_reserva(id_reserva):
     return jsonify({"message": "Reserva cancelada correctamente"}), 200 #Devuelve un JSON con mensaje de confirmación y código HTTP 200 (OK).
 
 
-#Conexion entre front y back hecha, faltaría conectar con la base de datos MySQL
+# Crear reserva
+@app.route('/api/reservas/nueva', methods=['POST'])
+def crear_reserva():
+    pass  # Implementar la lógica para crear una nueva reserva
+
+# Obtener las fechas reservadas segun la cabaña
+@app.route('/api/reservas/fechas/<int:id_alojamiento>', methods=['GET'])
+
+def obtener_fechas_reservadas(cabaña):
+    pass  # Implementar la lógica para obtener las fechas reservadas
 
 if __name__ == '__main__':
 

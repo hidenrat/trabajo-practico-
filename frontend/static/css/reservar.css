@@ -235,7 +235,14 @@
 .mapa {
     margin-top: 20px;
     text-align: center;
+    border: 0;
+    border-radius: 10px;
+    padding-bottom: 20px;
+}
+
+.mapa iframe {
+    width: 610px;
     height: 300px;
-    border:0 radius: 10px;
-    
+    border: none;
+    border-radius: 10px;
 }

@@ -1,4 +1,5 @@
 import os
+from random import randint
 from flask import Flask, flash, jsonify, redirect, url_for, render_template, request, session
 import requests
 from flask_mail import Mail, Message
@@ -17,14 +18,15 @@ app.config['MAIL_USE_SSL'] = False
 
 mail= Mail(app)
 
-URL_BACKEND = "http://localhost:5003"
+URL_BACKEND = "http://localhost:5003/api"
 
 cabins = [
     {
         "name": "Mirador del Sol",
         "slug": "mirador-sol",
-        "ubicacion": "camping Splash",
-        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25646.533083070197!2d-56.708145498142464!3d-36.53441789556365!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x959c13b25808c597%3A0xe99286d15d09f144!2sCamping%20Splash!5e0!3m2!1ses!2sar!4v1763237766813!5m2!1ses!2sar",
+        "ubicacion": "Mendoza 315, Paraje Santas del Mar, Santa Teresita, Provincia de Buenos Aires, Argentina.",
+        "ubicacion_nombre": "Camping Santas del Mar",
+        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3206.1200939936566!2d-56.69409702339975!3d-36.527096961606965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x959c13b217a9e0c3%3A0xa3e02ff682c9495e!2sMendoza%20315%2C%20B7107%20Santa%20Teresita%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1763311568133!5m2!1ses-419!2sar",
         "images" :[
             {"src": "imgs/mirador-sol-1.jpg", "title": "Mirador del Sol", "subtitle": "Vista panorámica"},
             {"src": "/imgs/mirador-sol-2.jpg", "title": "Mirador del Sol", "subtitle": "Interior cálido"},
@@ -37,13 +39,18 @@ cabins = [
         ],
         "precio_por_noche": 250,
         "capacidad": 4,
-        "ammenities": "WiFi, Cocina, Piscina, Vista panorámica, Terraza elevada, Dormitorio principal, Dormitorio secundario, Baño moderno"
+        "ammenities": "WiFi, Cocina, Piscina, Vista panorámica, Terraza elevada, Dormitorio principal, Dormitorio secundario, Baño moderno",
+        "metros_cuadrados": 120,
+        "baños": 2,
+        "dormitorios": 2,
+        "PetFriendly": True
     },
     {
         "name": "Bosque Vivo",
         "slug": "bosque-vivo",
         "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25554.244290573894!2d-71.7442604347737!3d-36.811796947138724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x966ec5f70bbb576b%3A0x717ebbf62152bfed!2sBosque%20Vivo!5e0!3m2!1ses!2sar!4v1763241520821!5m2!1ses!2sar",
-        "ubicacion": "Sector Bosque Alegre",
+        "ubicacion": "Camino a las Termas de Chillán, KM 2 Camino a Los Pellines Km. 2, 3880000 Pinto, Chile",
+        "ubicacion_nombre": "Bosque Vivo",
         "images": [
             {"src": "/imgs/bosque-vivo-1.jpg", "title": "Bosque Vivo", "subtitle": "Rodeada de árboles"},
             {"src": "/imgs/bosque-vivo-2.jpg", "title": "Bosque Vivo", "subtitle": "Luz natural"},
@@ -54,13 +61,18 @@ cabins = [
         ],
         "precio_por_noche": 140,
         "capacidad": 3,
-        "ammenities": "Cocina rústica, Patio acogedor, Dormitorio principal, Baño rústico, Rodeada de árboles, Luz natural"
+        "ammenities": "Cocina rústica, Patio acogedor, Dormitorio principal, Baño rústico, Rodeada de árboles, Luz natural",
+        "metros_cuadrados": 90,
+        "baños": 1,
+        "dormitorios": 2,
+        "PetFriendly": False
     },
     {
         "name": "Rincón Lunar",
         "slug": "rincon-lunar",
         "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3267.2918101606288!2d-57.53728665411472!3d-35.024429028768374!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a267bb9d4928c9%3A0x7f95e094db03db05!2sDescanso%20Atalaya!5e0!3m2!1ses!2sar!4v1763241962633!5m2!1ses!2sar",
-        "ubicacion": "Descanso Atalaya",
+        "ubicacion": "Calle 5 - Sta. Florentina, B1913 Atalaya, Provincia de Buenos Aires, Argentina.",
+        "ubicacion_nombre": "Camping Descanso Atalaya",
         "images": [
             {"src": "/imgs/rincon-lunar-1.jpg", "title": "Rincón Lunar", "subtitle": "Cielo nocturno"},
             {"src": "/imgs/rincon-lunar-2.jpg", "title": "Rincón Lunar", "subtitle": "Interior acogedor"},
@@ -71,13 +83,18 @@ cabins = [
         ],
         "precio_por_noche": 180,
         "capacidad": 2,
-        "ammenities": "Cocina moderna, Dormitorio principal, Baño elegante, Piscina nocturna, Cielo nocturno, Interior acogedor"
+        "ammenities": "Cocina moderna, Dormitorio principal, Baño elegante, Piscina nocturna, Cielo nocturno, Interior acogedor",
+        "metros_cuadrados": 70,
+        "baños": 1,
+        "dormitorios": 1,
+        "PetFriendly": False
     },
     {
         "name": "Río Nativo",
-        "ubicacion": "Sector Río Sereno",
-        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6588613.381292173!2d-72.0925612671353!3d-36.26143902599086!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x966e957143b1cb5f%3A0x68acacb929e6c860!2sHostal%20junta%20Los%20Rios!5e0!3m2!1ses!2sar!4v1763242150058!5m2!1ses!2sar",
-        "slug": "Hostal junta Los Rios",
+        "ubicacion": "Av. Exequiel Bustillo 9491-8901, San Carlos de Bariloche, Río Negro",
+        "ubicacion_mapa": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3005.867102109815!2d-71.41052892320393!3d-41.11559342986262!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x961a70c70bc95d5f%3A0x68aa96a9988d8ea0!2sAv.%20Exequiel%20Bustillo%209491-8901%2C%20San%20Carlos%20de%20Bariloche%2C%20R%C3%ADo%20Negro!5e0!3m2!1ses!2sar!4v1763319070882!5m2!1ses!2sar",
+        "ubicacion_nombre": "Camping Lago Gutiérrez",
+        "slug": "rio-nativo",
         "images": [
             {"src": "/imgs/rio-nativo-1.jpg", "title": "Río Nativo", "subtitle": "Junto al agua"},
             {"src": "/imgs/rio-nativo-2.jpg", "title": "Río Nativo", "subtitle": "Deck exterior"},
@@ -88,7 +105,11 @@ cabins = [
         ],
         "precio_por_noche": 100,
         "capacidad": 3,
-        "ammenities": "Cocina rústica, Dormitorio principal, Baño principal, Deck exterior, Junto al agua, Interior cálido"
+        "ammenities": "Cocina rústica, Dormitorio principal, Baño principal, Deck exterior, Junto al agua, Interior cálido",
+        "metros_cuadrados": 80,
+        "baños": 1,
+        "dormitorios": 1,
+        "PetFriendly": True
     }
 ]
 
@@ -193,7 +214,7 @@ def reservar_cabaña(cabin_slug):
         return render_template('reservar_cabaña.html', cabin=cabin)
     else:
         # Redirigir a la página de reservar general si no encuentra la cabaña
-        return redirect(url_for('reservar'))
+        return redirect(url_for('cabañas'))
 
 @app.route('/mis_reservas', methods=['GET', 'POST'])
 def mis_reservas():
@@ -223,11 +244,8 @@ def cancelar_reserva():
 
     return redirect(url_for('mis_reservas', id=id_reserva))
 
-@app.route('/datos_reserva', methods=['GET', 'POST'])
+@app.route('/datos_reserva')
 def datos_reserva():
-    if request.method == 'POST':
-        # Enviar datos al backend a implementar
-        return redirect(url_for('index'))
     datos = session.get('reservation')
     if not datos or not datos.get("check_in") or not datos.get("check_out") or not datos.get("cant_personas"):
         flash('Por favor, complete todos los campos de la reserva.', 'error')
@@ -248,6 +266,25 @@ def enviar_mail():
     nombre = request.form.get('nombre')
     email = request.form.get('email')
     telefono = request.form.get('telefono')
+    id_reserva = randint(100000, 999999)  # Genera un ID de reserva aleatorio de 6 dígitos
+
+    datos = {
+        "id_reserva": id_reserva,
+        "cabaña": cabaña_nombre,
+        "check_in": check_in,
+        "check_out": check_out,
+        "cant_personas": cant_personas,
+        "experiencias": experiencias,
+        "total": total,
+        "nombre": nombre,
+        "email": email,
+        "telefono": telefono
+    }
+
+    # Enviar datos al backend para crear la reserva
+    #response = requests.post(f"{URL_BACKEND}/reservas/nueva", json=datos)
+    #if response.status_code != 201:
+    #    flash('Hubo un error al procesar la reserva. Por favor, intente nuevamente.', 'error')
 
     # Crear el mensaje de correo
     msg = Message('Confirmación de Reserva',
@@ -256,16 +293,17 @@ def enviar_mail():
 
     # Renderizar el template HTML del correo
     msg.html = render_template('confirmacion_reserva_email.html',
-                               cabin_slug=cabaña_nombre,
-                               check_in=check_in,
-                               check_out=check_out,
-                               cant_personas=cant_personas,
-                               experiencias=experiencias,
-                               total=total,
-                               nombre=nombre,
-                               email=email,
-                               telefono=telefono)
-
+                                cabin_slug=cabaña_nombre,
+                                reserva_id=id_reserva,
+                                check_in=check_in,
+                                check_out=check_out,
+                                cant_personas=cant_personas,
+                                experiencias=experiencias,
+                                total=total,
+                                nombre=nombre,
+                                email=email,
+                                telefono=telefono)
+    # Enviar el correo
     try:
         mail.send(msg)
     except Exception as e:

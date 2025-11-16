@@ -50,6 +50,15 @@
             color: #777;
             margin-top: 30px;
         }
+        button {
+            background-color: #2C7A2A;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -59,6 +68,7 @@
         <p>Gracias por elegirnos. A continuación se detallan los datos de tu reserva:</p>
         
         <div class="info">
+            <p><b>ID de Reserva:</b> {{ reserva_id }}</p>
             <p><b>Cabina seleccionada:</b> {{ cabin_slug }}</p>
             <p><b>Fecha de Check-in:</b> {{ check_in }}</p>
             <p><b>Fecha de Check-out:</b> {{ check_out }}</p>
@@ -82,8 +92,8 @@
             <p><b>Teléfono:</b> {{ telefono }}</p>
         </div>
 
-        <p>Si tienes alguna pregunta o necesitas hacer cambios en tu reserva, no dudes en contactarnos.</p>
-
+        <p>Para pagar, cancelar o modificar tu reserva, haz clic en el botón de abajo.</p>
+        <a href="{{ url_for('mis_reservas', reserva_id=reserva_id, _external=True) }}"><button>Mi reserva</button></a>
         <div class="footer">
             <p>&copy; 2025 Nordika Cabins. Todos los derechos reservados.</p>
         </div>
