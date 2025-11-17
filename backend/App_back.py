@@ -17,13 +17,21 @@ def get_cabanas():
     cursor.execute("""
         SELECT 
             id_alojamiento AS id,
-            nombre,
-            direccion,
+            name,
+            ubicacion,
             ciudad,
             pais,
-            precio_noche,
+            precio_por_noche,
             capacidad,
-            descripcion
+            ammenities,
+            slug,
+            ubicacion_nombre,
+            ubicacion_mapa,
+            images,
+            metros_cuadrados,
+            baños,
+            dormitorios,
+            petFriendly
         FROM alojamientos;
     """)
     alojamientos = cursor.fetchall()  # Obtiene todos los resultados de la consulta
@@ -39,8 +47,8 @@ def obtener_reservas_alojamiento(id_alojamiento):
     cursor = conn.cursor(dictionary=True) #hace que los resultados salgan como diccionario
 
     cursor.execute("""                             
-        SELECT fecha_entrada, fecha_salida 
-        FROM reservas
+        SELECT check_in, check_out 
+        FROM reserva
         WHERE id_alojamiento = %s
           AND estado <> 'cancelada';
     """, (id_alojamiento,))    #Busca todas las reservas del alojamiento indicado. solo trae fecha_entrada y fecha_salida y filtra para no traer las canceladas
@@ -55,8 +63,8 @@ def obtener_reservas_alojamiento(id_alojamiento):
     for r in reservas:
         eventos.append({
             "title": "Reservado",
-            "start": r["fecha_entrada"].strftime("%Y-%m-%d"),
-            "end": r["fecha_salida"].strftime("%Y-%m-%d"),
+            "start": r["check_in"].strftime("%Y-%m-%d"),
+            "end": r["check_out"].strftime("%Y-%m-%d"),
             "display": "block",
             "color": "#FF5252",
             "className": "reserved-event"
@@ -142,6 +150,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
