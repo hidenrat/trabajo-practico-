@@ -1,10 +1,18 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from db import get_conexion 
+from flask_mail import Mail, Message
 #Se debe instalar Flask-CORS 
 #para permitir llamadas desde el puerto 5002
 #Comando en bash: pip install flask-cors
-
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_DEFAULT_SENDER'] = 'practicotrabajo74@gmail.com'
+app.config['MAIL_USERNAME'] = 'practicotrabajo74@gmail.com'
+app.config['MAIL_PASSWORD'] = 'vsug hlcz dpin dwvn'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+mail = Mail(app)
 app = Flask(__name__)
 CORS(app) 
 #Habilitar CORS para permitir que el Frontend (puerto 5002) llame a este Backend (puerto 5003)
@@ -110,6 +118,61 @@ def obtener_reservas_cliente(id_cliente):
 
     return jsonify(reservas) #Si hay reservas, devuelve la lista completa como JSON (HTTP 200 implícito). El JSON contendrá objetos con campos como id_reserva, fecha_entrada, fecha_salida, estado, nombre_alojamiento, etc.
 
+@app.route('/api/reservas/enviar-mail/<int:id_reserva>', methods=['POST'])
+def enviar_mail_reserva (id_reserva):
+    conn = get_conexion ()
+    cursor = conn.cursor (dictionary = true) 
+
+    cursor.execute ("""
+        SELECT
+            r.id_reserva,
+            r.nombre,
+            r.check_in,
+            r.check_out,
+            r.cant_personas,
+            r.total,
+            r.email,
+            r.telefono
+            a.name as alojamiento
+        FROM reserva r 
+        INNER JOIN alojamintos a ON r.id_alojamientos = a.id_alojamiento
+        WHERE r.id_reserva = %s;
+    """ (id_reserva,))
+    
+    reserva = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not reserva:
+        return jsonify({"error" : "reserva no encontrada" }) ,404
+
+    asunto = f"confirmacion de su reserva #{id_reserva}"
+
+    cuerpo_html =f"""
+        <h2> Hola {reserva['nombre']}! </h2>
+        <p> su reserva a sido confirmada </p>
+
+        <h3> Datos sobre su reserva </h3>
+        <ul>   
+            <li><strong>Alojamiento:</strong> {reserva['alojamiento']}</li>
+            <li><strong>Check-in:</strong> {reserva['check_in']}</li>
+            <li><strong>Check-out:</strong> {reserva['check_out']}</li>
+            <li><strong>Personas:</strong> {reserva['cant_personas']}</li>
+            <li><strong>Total:</strong> ${reserva['total']}</li>
+        </ul>
+        <p>¡Gracias por elegirnos!</p>
+    """
+    
+    msg = Message (asunto,recipients=[reserva["email"]])
+    msg.html = cuerpo_html
+    try:
+        mail.send(msg)
+    except Exception as e:
+        return jsonify({"error": f"No se pudo enviar el mail: {str(e)}"}), 500
+
+    return jsonify({"message": "Mail enviado correctamente"}), 200
+
+
 @app.route('/api/reservas/cancelar/<int:id_reserva>', methods=['POST'])
 def cancelar_reserva(id_reserva):
 
@@ -150,6 +213,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
