@@ -3,23 +3,34 @@ USE sistema_reservas;
 
 CREATE TABLE alojamientos (
     id_alojamiento INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    direccion VARCHAR(255) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    slug VARCHAR(150) NOT NULL,
+    ubicacion VARCHAR(255) NOT NULL,
+    ubicacion_nombre VARCHAR(150) NOT NULL,
+    ubicacion_mapa VARCHAR(255) NOT NULL,
+    images JASON NOT NULL, 
+    precio_por_noche INT NOT NULL,
+    capacidad INT NOT NULL,
+    ammenities VARCHAR(255) NOT NULL
     ciudad VARCHAR(100),
     pais VARCHAR(100),
-    precio_noche DECIMAL(10,2) NOT NULL,
-    capacidad INT,
-    descripcion TEXT,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    metros_cuadrados INT NOT NULL,
+    baños INT NOT NULL,
+    dormitorios INT NOT NULL,
+    petFriendly BOOLEAN,
 );
 
-CREATE TABLE reservas (
+CREATE TABLE reserva (
     id_reserva INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
     id_alojamiento INT NOT NULL,
-    fecha_entrada DATE NOT NULL,
-    fecha_salida DATE NOT NULL,
-    num_personas INT,
+    check_in DATE NOT NULL,
+    check_out DATE NOT NULL,
+    cant_personas INT,
+    total INT NOT NULL,
+    nombre VARCHAR(150),
+    email VARCHAR(150)
+    telefono INT NOT NULL,
     estado ENUM('pendiente','confirmada','cancelada') DEFAULT 'pendiente',
     fecha_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -35,7 +46,8 @@ CREATE TABLE servicios_extras (
     id_servicio INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
-    precio DECIMAL(10,2) NOT NULL
+    precio INT NOT NULL,
+    capacidad INT NOT NULL,
 );
 
 CREATE TABLE servicios_reserva (
