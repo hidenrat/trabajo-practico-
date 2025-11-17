@@ -1,7 +1,10 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from db import get_conexion 
 from flask_mail import Mail, Message
+import js, re
+from daterime import date, datetime
+
 #Se debe instalar Flask-CORS 
 #para permitir llamadas desde el puerto 5002
 #Comando en bash: pip install flask-cors
@@ -47,6 +50,147 @@ def get_cabanas():
     conn.close()                     # Cierra la conexión a la base de datos
 
     return jsonify(alojamientos)     # Devuelve los resultados como JSON
+
+def validar_fechas(check_in_str, check_out_str):
+    check_in = datetime.strptime(check_in_str, "%Y-%m-%d").date()
+    check_out = datetime.strptime(check_out_str, "%Y-%m-%d").date()
+
+    if check_in >= check_out:
+        raise ValueError("La fecha de entrada debe ser menor a la de salida")
+
+    if check_in < date.today():
+        raise ValueError("La fecha de entrada no puede estar en el pasado")
+
+    return check_in, check_out
+
+def obtener_alojamiento_por_slug(slug):
+    conn = get_conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id_alojamiento, capacidad, precio_por_noche
+        FROM alojamientos
+        WHERE slug = %s
+    """, (slug,))
+
+    fila = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not fila:
+        raise ValueError("El alojamiento no existe")
+
+    return fila 
+
+def validar_capacidad(capacidad, num_personas):
+    if num_personas > capacidad:
+        raise ValueError(f"Capacidad excedida. Máximo permitido: {capacidad}")
+
+
+def validar_email(email):
+    patron = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    
+    if not re.match(patron, email):
+        raise ValueError("El email ingresado no es válido.")
+    
+    return email
+
+def hay_superposicion(id_alojamiento, check_in, check_out):
+    conn = get_conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*) 
+        FROM reservas 
+        WHERE id_alojamiento = %s 
+        AND estado != 'cancelada'
+        AND (
+            (fecha_entrada BETWEEN %s AND %s) OR
+            (fecha_salida BETWEEN %s AND %s) OR
+            (%s BETWEEN fecha_entrada AND fecha_salida) OR
+            (%s BETWEEN fecha_entrada AND fecha_salida)
+        )
+    """, (
+        id_alojamiento,
+        check_in, check_out,
+        check_in, check_out,
+        check_in, check_out
+    ))
+
+    cont = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return cont > 0
+
+def insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valido):
+    conn = get_conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO reservas 
+        (id_alojamiento, nombre_cliente, email, telefono, 
+         fecha_entrada, fecha_salida, num_personas, precio_total, estado) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'confirmada')
+    """, (
+        id_alojamiento, data_form['nombre'], email_valido, data_form['telefono'],
+        check_in, check_out, data_form['cant_personas'], data_form['total']
+    ))
+
+    conn.commit()
+    id_reserva = cursor.lastrowid
+
+    cursor.close()
+    conn.close()
+
+    return id_reserva
+
+
+@app.route('/api/reservas', methods=['POST'])
+def crear_reserva():
+    try:
+        data_form = request.json
+
+        # 1. Validar fechas
+        check_in, check_out = validar_fechas(data_form['check_in'], data_form['check_out'])
+
+        # 2. Obtener alojamiento y sus datos
+        id_alojamiento, capacidad, precio_noche = obtener_alojamiento_por_slug(data_form['cabin_slug'])
+
+        # 3. Validar capacidad
+        validar_capacidad(capacidad, data_form['cant_personas'])
+
+        # 4. Validar email
+        email_valido = validar_email(data_form['email'])
+
+        # 5. Validar superposición
+        if hay_superposicion(id_alojamiento, check_in, check_out):
+            return jsonify({
+                "success": False,
+                "error": "Las fechas seleccionadas no están disponibles"
+            }), 400
+
+        # 6. Insertar la reserva
+        id_reserva = insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valido)
+
+        return jsonify({
+            "success": True,
+            "message": "Reserva creada exitosamente",
+            "id_reserva": id_reserva
+        }), 201
+
+    except ValueError as err:
+        return jsonify({
+            "success": False, 
+            "error": str(err)}), 400
+
+    except Exception as e:
+        return jsonify({
+            "success": False, 
+            "error": f"Error del servidor: {e}"}), 500
+
 
 @app.route('/api/reservas/<int:id_alojamiento>', methods=['GET']) #captura un entero desde la URL y lo pasa a la función como id_alojamiento
 def obtener_reservas_alojamiento(id_alojamiento):
@@ -213,6 +357,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
