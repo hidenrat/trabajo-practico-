@@ -75,14 +75,18 @@ def obtener_reservas_cliente(id_cliente):
             r.id_reserva,
             r.id_cliente,
             r.id_alojamiento,
-            r.fecha_entrada,
-            r.fecha_salida,
-            r.num_personas,
+            r.check_in,
+            r.check_out,
+            r.cant_personas,
             r.estado,
+            r.total,
+            r.nombre,
+            r.email,
+            r.telefono,
             r.fecha_reserva,
-            a.nombre AS nombre_alojamiento,
-            a.direccion
-        FROM reservas r
+            a.nombre AS name,
+            a.ubicacion
+        FROM reserva r
         INNER JOIN alojamientos a ON r.id_alojamiento = a.id_alojamiento
         WHERE r.id_cliente = %s;
     """, (id_cliente,))  #Selecciona campos relevantes de la tabla reservas (alias r) y algunos campos del alojamiento (alias a).
@@ -107,7 +111,7 @@ def cancelar_reserva(id_reserva):
     # verificar que exista
     cursor.execute("""
         SELECT estado 
-        FROM reservas 
+        FROM reserva 
         WHERE id_reserva = %s;
     """, (id_reserva,))  # Consulta la columna estado de la fila con id_reserva dado. Se usa placeholder %s para seguridad.
     
@@ -115,13 +119,13 @@ def cancelar_reserva(id_reserva):
 
     if not reserva:
         cursor.close()
-        conn.closey 
+        conn.close() 
         return jsonify({"error": "Reserva no encontrada"}), 404
                             #si no encuentra nada se cierra el cursor y la conexion y devuelve "error" reserva no encontrada y ponemos un error 404
     
     # actualizar estado
     cursor.execute("""
-        UPDATE reservas
+        UPDATE reserva
         SET estado = 'cancelada'
         WHERE id_reserva = %s;
     """, (id_reserva,))   #usamos la sentencia UPDATE para modificar el estado a "cancelada" 
@@ -138,5 +142,6 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
