@@ -21,35 +21,95 @@ CORS(app)
 #Habilitar CORS para permitir que el Frontend (puerto 5002) llame a este Backend (puerto 5003)
 
 #ENDPOINT 
+
 @app.route('/api/cabanas', methods=['GET'])
 def get_cabanas():
-    conn = get_conexion()      # Crea la conexión a MYSQL
-    cursor = conn.cursor(dictionary=True)  # Crea un “cursor” para ejecutar consultas sql
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    # Obtiene los alojamientos
     cursor.execute("""
         SELECT 
             id_alojamiento AS id,
             name,
+            slug,
+            ubicacion_mapa,
             ubicacion,
-            ciudad,
-            pais,
+            ubicacion_nombre,
             precio_por_noche,
             capacidad,
-            ammenities,
-            slug,
-            ubicacion_nombre,
-            ubicacion_mapa,
-            images,
+            amenities,
             metros_cuadrados,
             baños,
             dormitorios,
             petFriendly
         FROM alojamientos;
     """)
-    alojamientos = cursor.fetchall()  # Obtiene todos los resultados de la consulta
-    cursor.close()                   # Cierra el cursor
-    conn.close()                     # Cierra la conexión a la base de datos
+    alojamientos = cursor.fetchall()
 
-    return jsonify(alojamientos)     # Devuelve los resultados como JSON
+    # Recorre cada alojamiento para obtener sus imágenes
+    for alojamiento in alojamientos:
+        cursor.execute("""
+            SELECT src, title, subtitle
+            FROM imagenes_alojamiento
+            WHERE id_alojamiento = %s;
+        """, (alojamiento['id'],))
+
+        imagenes = cursor.fetchall()
+        alojamiento['imagenes'] = imagenes
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(alojamientos)
+
+# En caso de que se quisiera obtener un alojamiento en particular
+@app.route('/api/cabanas/<slug>', methods=['GET'])
+def get_cabana(slug):
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    # Obtener datos del alojamiento especifico
+    cursor.execute("""
+        SELECT 
+            id_alojamiento AS id,
+            name,
+            slug,
+            ubicacion_mapa,
+            ubicacion,
+            ubicacion_nombre,
+            precio_por_noche,
+            capacidad,
+            amenities,
+            metros_cuadrados,
+            baños,
+            dormitorios,
+            petFriendly
+        FROM alojamientos
+        WHERE slug = %s;
+    """, (slug,))
+
+    alojamiento = cursor.fetchone()
+
+    if not alojamiento:
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "Alojamiento no encontrado"}), 404
+
+    # Obtener imágenes de ese alojamiento especifico
+    cursor.execute("""
+        SELECT src, title, subtitle
+        FROM imagenes_alojamiento
+        WHERE id_alojamiento = %s;
+    """, (alojamiento["id"],))
+
+    imagenes = cursor.fetchall()
+    alojamiento["imagenes"] = imagenes
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(alojamiento), 200
 
 def validar_fechas(check_in_str, check_out_str):
     check_in = datetime.strptime(check_in_str, "%Y-%m-%d").date()
@@ -65,10 +125,10 @@ def validar_fechas(check_in_str, check_out_str):
 
 def obtener_alojamiento_por_slug(slug):
     conn = get_conexion()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT id_alojamiento, capacidad, precio_por_noche
+        SELECT id_alojamiento, capacidad
         FROM alojamientos
         WHERE slug = %s
     """, (slug,))
@@ -102,14 +162,14 @@ def hay_superposicion(id_alojamiento, check_in, check_out):
 
     cursor.execute("""
         SELECT COUNT(*) 
-        FROM reservas 
+        FROM reserva 
         WHERE id_alojamiento = %s 
         AND estado != 'cancelada'
         AND (
-            (fecha_entrada BETWEEN %s AND %s) OR
-            (fecha_salida BETWEEN %s AND %s) OR
-            (%s BETWEEN fecha_entrada AND fecha_salida) OR
-            (%s BETWEEN fecha_entrada AND fecha_salida)
+            (check_in BETWEEN %s AND %s) OR
+            (check_out BETWEEN %s AND %s) OR
+            (%s BETWEEN check_in AND check_out) OR
+            (%s BETWEEN check_in AND check_out)
         )
     """, (
         id_alojamiento,
@@ -130,14 +190,14 @@ def insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valid
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO reservas 
-        (id_alojamiento, nombre_cliente, email, telefono, 
-         fecha_entrada, fecha_salida, num_personas, precio_total, estado) 
+        INSERT INTO reserva 
+        (id_alojamiento, check_in, check_out, cant_personas, 
+        total, nombre, email, telefono, estado) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'confirmada')
     """, (
-        id_alojamiento, data_form['nombre'], email_valido, data_form['telefono'],
-        check_in, check_out, data_form['cant_personas'], data_form['total']
-    ))
+        id_alojamiento, check_in, check_out, data_form['cant_personas'], 
+        data_form['total'], data_form['nombre'], email_valido, 
+        data_form['telefono']))
 
     conn.commit()
     id_reserva = cursor.lastrowid
@@ -157,7 +217,9 @@ def crear_reserva():
         check_in, check_out = validar_fechas(data_form['check_in'], data_form['check_out'])
 
         # 2. Obtener alojamiento y sus datos
-        id_alojamiento, capacidad, precio_noche = obtener_alojamiento_por_slug(data_form['cabin_slug'])
+        fila_alojamiento = obtener_alojamiento_por_slug(data_form['cabin_slug'])
+        id_alojamiento = fila_alojamiento['id_alojamiento']
+        capacidad = fila_alojamiento['capacidad']
 
         # 3. Validar capacidad
         validar_capacidad(capacidad, data_form['cant_personas'])
@@ -191,6 +253,41 @@ def crear_reserva():
             "success": False, 
             "error": f"Error del servidor: {e}"}), 500
 
+# Obtener los detalles de una reserva específica
+@app.route("/api/reservas/<int:id_reserva>", methods=["GET"])
+def obtener_reserva(id_reserva):
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            r.id_reserva,
+            r.check_in,
+            r.check_out,
+            r.cant_personas,
+            r.total,
+            r.email,
+            r.telefono,
+            r.nombre,
+            r.estado,
+            r.fecha_reserva,
+            a.name AS alojamiento,
+            a.slug AS alojamiento_slug
+        FROM reserva r
+        JOIN alojamientos a
+            ON r.id_alojamiento = a.id_alojamiento
+        WHERE r.id_reserva = %s
+    """, (id_reserva,))
+
+    reserva = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not reserva:
+        return jsonify({"error": "Reserva no encontrada"}), 404
+
+    return jsonify(reserva), 200
 
 @app.route('/api/reservas/<int:id_alojamiento>', methods=['GET']) #captura un entero desde la URL y lo pasa a la función como id_alojamiento
 def obtener_reservas_alojamiento(id_alojamiento):
@@ -357,6 +454,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
