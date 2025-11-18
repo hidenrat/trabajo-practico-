@@ -63,6 +63,27 @@ def get_cabanas():
 
     return jsonify(alojamientos)
 
+
+@app.route('/api/servicios', methods=['GET'])
+def obtener_servicio ():
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT 
+             id_servicio,
+            nombre AS title,
+            capacidad,
+            descripcion AS subdesc,
+            src,
+            precio
+        FROM servicios_extras
+    """)
+
+    servicios = cursor.fetchall()
+    cursor.close()
+    cunn.close()
+    return jsonify(servicios), 200 
+
 # En caso de que se quisiera obtener un alojamiento en particular
 @app.route('/api/cabanas/<slug>', methods=['GET'])
 def get_cabana(slug):
@@ -454,6 +475,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
