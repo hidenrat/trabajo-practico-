@@ -213,7 +213,7 @@ def mis_reservas():
         return render_template('mis_reservas.html', datos=None)
     elif request.method == 'POST':
         id_reserva = request.form.get('reservation_id')
-        response = requests.get(f"{URL_BACKEND}/reservas/{id_reserva}")
+        response = requests.get(f"{http://localhost:5003/api}/reservas/{id_reserva}")
         if response.status_code == 200:
             datos_reserva = response.json()
         else:
@@ -226,7 +226,7 @@ def cancelar_reserva():
     id_reserva = request.form.get('reservation_id')
     print("ID recibido del formulario:", id_reserva)
 
-    response = requests.post(f"{URL_BACKEND}/cancelar/{id_reserva}")
+    response = requests.post(f"{http://localhost:5003/api}/cancelar/{id_reserva}")
     
     if response.status_code == 200:
         flash('Reserva cancelada correctamente', 'success')
