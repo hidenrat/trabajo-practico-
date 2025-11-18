@@ -122,7 +122,7 @@
             </div>
             <div class="portfolio-container">
                 {% for cabin in cabins %}
-                    {% for img in cabin.images %}
+                    {% for img in cabin.imagenes %}
                         <div class="col-md-6 col-lg-4 {{ cabin.slug }}">
                             <div class="portfolio-item">
                                 <img src="{{ url_for('static', filename=img.src, _external=True) }}" class="img-fluid" alt="{{ img.title }}">

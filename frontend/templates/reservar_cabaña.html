@@ -52,7 +52,7 @@
                 <div class="cabin-carousel-wrapper mb-4">
                     <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
                         <div class="cabin-carousel-track">
-                            {% for img in cabin.images %}
+                            {% for img in cabin.imagenes %}
                                 <div class="cabin-carousel-item">
                                     <img src="{{url_for('static', filename=img.src, _external=True)}}" alt="{{ img.title }}">
                                     <div class="cabin-carousel-caption">
@@ -71,7 +71,7 @@
                 
                 <h4>Comodidades</h4>
                 <ul>
-                    {% for amenity in cabin.ammenities.split(', ') %}
+                    {% for amenity in cabin.amenities.split(', ') %}
                         <li>{{ amenity }}</li>
                     {% endfor %}
                 </ul>
@@ -144,9 +144,11 @@
 
         //Por ahora, usamos estos como ejemplo
         var reservedDates = [
-            { title: 'Reservado', start: '2025-12-10', end: '2025-12-15', display: 'block', color: '#FF5252', className: 'reserved-event' },
-            { title: 'Reservado', start: '2025-12-24', end: '2025-12-28', display: 'block', color: '#FF5252', className: 'reserved-event' },
+            {% for r in real_reserved_dates %}
+                { title: 'Reservado', start: '{{ r.start }}', end: '{{ r.end }}', display: 'block', color: '#FF5252', className: 'reserved-event' },
+            {% endfor %}
         ];
+        console.log(reservedDates);
     </script>
     <script src="{{ url_for('static', filename='js/reservar-logica.js', _external=True) }}"></script>
 {% endblock %}

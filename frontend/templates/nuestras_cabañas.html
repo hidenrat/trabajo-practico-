@@ -53,7 +53,7 @@
                     <div class="col-md-6">
                         <ul class="list-unstyled">
                             <li><strong>Capacidad:</strong> {{ cabin.capacidad }} personas</li>
-                            <li><strong>Comodidades:</strong> {{ cabin.ammenities }}</li>
+                            <li><strong>Comodidades:</strong> {{ cabin.amenities }}</li>
                             <li><strong>Precio por noche:</strong> {{ cabin.precio_por_noche }}</li>
                             <li><strong>Ubicación:</strong> {{ cabin.ubicacion }}</li>
                         </ul>
@@ -64,7 +64,7 @@
                 <div class="cabin-carousel-wrapper">                    
                     <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
                         <div class="cabin-carousel-track">
-                            {% for img in cabin.images %}
+                            {% for img in cabin.imagenes %}
                                 <div class="cabin-carousel-item">
                                     <img src="{{url_for('static', filename=img.src, _external=True)}}" alt="{{ img.title }}">
                                     <div class="cabin-carousel-caption">
