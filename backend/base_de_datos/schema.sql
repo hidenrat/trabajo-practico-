@@ -4,39 +4,32 @@ USE sistema_reservas;
 CREATE TABLE alojamientos (
     id_alojamiento INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
-    slug VARCHAR(150) NOT NULL,
-    ubicacion VARCHAR(255) NOT NULL,
+    slug VARCHAR(150) NOT NULL UNIQUE,
+    ubicacion_mapa TEXT NOT NULL,
+    ubicacion TEXT NOT NULL,
     ubicacion_nombre VARCHAR(150) NOT NULL,
-    ubicacion_mapa VARCHAR(255) NOT NULL,
-    images JASON NOT NULL, 
     precio_por_noche INT NOT NULL,
     capacidad INT NOT NULL,
-    ammenities VARCHAR(255) NOT NULL
-    ciudad VARCHAR(100),
-    pais VARCHAR(100),
+    amenities TEXT NOT NULL,
     metros_cuadrados INT NOT NULL,
     baños INT NOT NULL,
     dormitorios INT NOT NULL,
-    petFriendly BOOLEAN,
+    petFriendly BOOLEAN NOT NULL
 );
 
 CREATE TABLE reserva (
     id_reserva INT AUTO_INCREMENT PRIMARY KEY,
-    id_cliente INT NOT NULL,
     id_alojamiento INT NOT NULL,
     check_in DATE NOT NULL,
     check_out DATE NOT NULL,
     cant_personas INT,
     total INT NOT NULL,
     nombre VARCHAR(150),
-    email VARCHAR(150)
-    telefono INT NOT NULL,
+    email VARCHAR(150),
+    telefono VARCHAR(100) NOT NULL,
     estado ENUM('pendiente','confirmada','cancelada') DEFAULT 'pendiente',
     fecha_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
     FOREIGN KEY (id_alojamiento) REFERENCES alojamientos(id_alojamiento)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -47,7 +40,7 @@ CREATE TABLE servicios_extras (
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
     precio INT NOT NULL,
-    capacidad INT NOT NULL,
+    capacidad INT NOT NULL
 );
 
 CREATE TABLE servicios_reserva (
@@ -56,11 +49,22 @@ CREATE TABLE servicios_reserva (
     id_servicio INT NOT NULL,
     cantidad INT DEFAULT 1,
 
-    FOREIGN KEY (id_reserva) REFERENCES reservas(id_reserva)
+    FOREIGN KEY (id_reserva) REFERENCES reserva(id_reserva)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
     FOREIGN KEY (id_servicio) REFERENCES servicios_extras(id_servicio)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE imagenes_alojamiento (
+    id_imagen INT AUTO_INCREMENT PRIMARY KEY,
+    id_alojamiento INT NOT NULL,
+    src VARCHAR(255) NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    subtitle VARCHAR(150) NOT NULL,
+    FOREIGN KEY (id_alojamiento) REFERENCES alojamientos(id_alojamiento)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
