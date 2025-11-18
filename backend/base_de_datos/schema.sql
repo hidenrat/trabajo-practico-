@@ -37,10 +37,11 @@ CREATE TABLE reserva (
 
 CREATE TABLE servicios_extras (
     id_servicio INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    precio INT NOT NULL,
-    capacidad INT NOT NULL
+    title VARCHAR(150) NOT NULL,
+    subdesc TEXT NOT NULL,
+    src VARCHAR(200) NOT NULL,
+    cantidad INT NOT NULL,
+    precio INT NOT NULL 
 );
 
 CREATE TABLE servicios_reserva (
