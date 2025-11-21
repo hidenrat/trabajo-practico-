@@ -1,8 +1,8 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect
 from flask_cors import CORS
 from db import get_conexion 
 from flask_mail import Mail, Message
-import json, re
+import js, re
 from datetime import date, datetime
 
 # Crear la app primero
@@ -67,7 +67,7 @@ def get_cabanas():
 
     return jsonify(alojamientos)
 
-
+# Obtener los servicios de la tabla servicios_extra
 @app.route('/api/servicios', methods=['GET'])
 def obtener_servicio ():
     conn = get_conexion()
@@ -90,7 +90,7 @@ def obtener_servicio ():
 
 # En caso de que se quisiera obtener un alojamiento en particular
 @app.route('/api/cabanas/<slug>', methods=['GET'])
-def get_cabana(slug):
+def get_solo_una_cabana(slug):
     conn = get_conexion()
     cursor = conn.cursor(dictionary=True)
 
@@ -148,6 +148,7 @@ def validar_fechas(check_in_str, check_out_str):
 
     return check_in, check_out
 
+# Extrae el alojamiento según el slug de la URL
 def obtener_alojamiento_por_slug(slug):
     conn = get_conexion()
     cursor = conn.cursor(dictionary=True)
@@ -171,7 +172,6 @@ def obtener_alojamiento_por_slug(slug):
 def validar_capacidad(capacidad, num_personas):
     if num_personas > capacidad:
         raise ValueError(f"Capacidad excedida. Máximo permitido: {capacidad}")
-
 
 def validar_email(email):
     patron = r"^[\w\.-]+@[\w\.-]+\.\w+$"
@@ -278,7 +278,7 @@ def crear_reserva():
             "success": False, 
             "error": f"Error del servidor: {e}"}), 500
 
-# Obtener los detalles de una reserva específica
+# Obtener los campos de una reserva específica
 @app.route("/api/reservas/<int:id_reserva>", methods=["GET"])
 def obtener_reserva(id_reserva):
     conn = get_conexion()
@@ -476,6 +476,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
