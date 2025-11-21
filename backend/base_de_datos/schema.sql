@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS sistema_reservas;
+CREATE DATABASE IF NOT EXISTS sistema_reservas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE sistema_reservas;
 
 CREATE TABLE alojamientos (
