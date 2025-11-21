@@ -1,15 +1,16 @@
-import mysql.connector as connector
-#Instalen mysql.connector
 #el comando es "pipenv install mysql-connector-python"
 
 def get_conexion():
-    conexion = connector.connect(
+    conexion = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="nicolas745",
+        password="contraseña",
         #aca pongan la contraseña q hayan puesto ( pongan si o si una contraseña sino no van a tener acceso )
-        database="sistema_reservas"
+        database="sistema_reservas",
         #aca pongan el nombre de su base de datos
+        use_unicode=True,
+        charset="utf8mb4",
+        collation="utf8mb4_unicode_ci"
     )
     return conexion
 
