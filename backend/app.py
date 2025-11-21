@@ -369,6 +369,106 @@ def retornar_reservas_por_slug(slug):
             "error": f"Error del servidor: {e}"
         }), 500
 
+# Se encarga de enviar los campos de la tabla de reserva de un id en específico y renderiza el tamplate de confirmacion_reserva_email
+@app.route('/api/reservas/enviar-mail/<int:id_reserva>', methods=['POST'])
+def enviar_mail_reserva(id_reserva):
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            r.id_reserva,
+            r.nombre,
+            r.check_in,
+            r.check_out,
+            r.cant_personas,
+            r.total,
+            r.email,
+            r.telefono,
+            a.name AS alojamiento
+        FROM reserva r
+        INNER JOIN alojamientos a ON r.id_alojamiento = a.id_alojamiento
+        WHERE r.id_reserva = %s
+    """, (id_reserva,))
+
+    reserva = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not reserva:
+        return jsonify({"error": "reserva no encontrada"}), 404
+
+    msg = Message(
+        'Confirmación de Reserva',
+        sender='practicotrabajo74@gmail.com',
+        recipients=[reserva["email"]]
+    )
+
+    msg.html = render_template(
+        'confirmacion_reserva_email.html',
+        cabin_slug=reserva['alojamiento'],
+        reserva_id=id_reserva,
+        check_in=reserva['check_in'],
+        check_out=reserva['check_out'],
+        cant_personas=reserva['cant_personas'],
+        experiencias=[],
+        total=reserva['total'],
+        nombre=reserva['nombre'],
+        email=reserva['email'],
+        telefono=reserva['telefono'],
+    )
+
+    try:
+        mail.send(msg)
+    except Exception as e:
+        return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
+
+    return jsonify({"message": "Mail enviado correctamente"}), 200
+
+# Recibe la información de la funcion enviar_email y renderiza y retorna el template confirmacion_reserva_email.html
+@app.route('/confirmar_y_mostrar/<int:id_reserva>', methods=['GET'])
+def confirmar_y_mostrar(id_reserva):
+
+    # Enviar el email llamando a la función API
+    enviar_mail_reserva(id_reserva)
+
+    # Volver a traer los datos para mostrarlos en la plantilla
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            r.id_reserva,
+            r.nombre,
+            r.check_in,
+            r.check_out,
+            r.cant_personas,
+            r.total,
+            r.email,
+            r.telefono,
+            a.name AS alojamiento
+        FROM reserva r
+        INNER JOIN alojamientos a ON r.id_alojamiento = a.id_alojamiento
+        WHERE r.id_reserva = %s
+    """, (id_reserva,))
+
+    reserva = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "confirmacion_reserva_email.html",
+        cabin_slug=reserva['alojamiento'],
+        reserva_id=reserva['id_reserva'],
+        check_in=reserva['check_in'],
+        check_out=reserva['check_out'],
+        cant_personas=reserva['cant_personas'],
+        experiencias=[],
+        total=reserva['total'],
+        nombre=reserva['nombre'],
+        email=reserva['email'],
+        telefono=reserva['telefono']
+    )
 
 @app.route('/api/reservas/cancelar/<int:id_reserva>', methods=['POST'])
 def cancelar_reserva(id_reserva):
@@ -410,6 +510,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
