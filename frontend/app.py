@@ -6,7 +6,7 @@ import json
 from flask_mail import Mail, Message
 
 app = Flask(__name__)
-# SECRET_KEY is required for sessions/flash to work. Prefer setting it via environment in production.
+
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_change_me')
 
 URL_BACKEND = "http://localhost:5003"
@@ -73,27 +73,12 @@ def mis_reservas():
         return render_template('mis_reservas.html', datos=None)
     elif request.method == 'POST':
         id_reserva = request.form.get('reservation_id')
-        response = requests.get(f"{URL_BACKEND}/api/reservas/{id_reserva}")
+        response = requests.get(f"{URL_BACKEND}/reservas/{id_reserva}")
         if response.status_code == 200:
             datos_reserva = response.json()
         else:
             datos_reserva = False
         return render_template('mis_reservas.html', datos=datos_reserva)
-
-
-@app.route('/cancelar', methods=['POST'])
-def cancelar_reserva():
-    id_reserva = request.form.get('reservation_id')
-    print("ID recibido del formulario:", id_reserva)
-
-    response = requests.post(f"{URL_BACKEND}/api/cancelar/{id_reserva}")
-    
-    if response.status_code == 200:
-        flash('Reserva cancelada correctamente', 'success')
-    else:
-        flash('Hubo un error al cancelar la reserva', 'error')
-
-    return redirect(url_for('mis_reservas', id=id_reserva))
 
 @app.route('/datos_reserva')
 def datos_reserva():
@@ -112,7 +97,7 @@ def procesar_reserva():
         documento = request.form.get('documento')
         
         reservar_data = session.get('reservation')
-        # En caso de que la session de reservar_cabaña.html no tenga información da error
+
         if not reservar_data:
             return "Error: No hay datos de reserva en sesión", 400
         # Guardo los datos de los dos formularios en un diccionario
@@ -126,7 +111,7 @@ def procesar_reserva():
             'cant_personas': reservar_data['cant_personas'],
             'total': reservar_data['total']
         }
-        # intento mandar el diccionario datos_reserva en formato json a una ruta llamada back-end/reserva
+    
         try:
             response = requests.post(
                 f"{URL_BACKEND}/api/reservas",
@@ -137,14 +122,8 @@ def procesar_reserva():
             if response.status_code == 201:
                 session.pop('reservation', None)
                 reserva_id = response.json().get("id_reserva")
-                email_response = requests.post(
-                    f"{URL_BACKEND}/api/reservas/enviar-mail/{reserva_id}",
-                    headers={'Content-Type': 'application/json'}
-                )
-                if email_response.status_code == 200:
-                    return redirect(url_for('mis_reservas'))
-                else:
-                    return f"Error al enviar el correo de confirmación: {email_response.text}", 500
+
+                return redirect(f"URL_BACKEND/confirmar_y_mostrar/{reserva_id}")
             else:
                 error_data = response.json()
                 return f"Error del backend: {error_data.get('error', 'Error desconocido')}", 400
