@@ -1,9 +1,10 @@
+from datetime import datetime
 import os
 from random import randint
 from flask import Flask, flash, jsonify, redirect, url_for, render_template, request, session
 import requests
-import json
-from flask_mail import Mail, Message
+
+
 
 app = Flask(__name__)
 
@@ -60,9 +61,10 @@ def reservar_cabaña(cabin_slug):
 
     cabin = next((c for c in cabins if c['slug'] == cabin_slug), None)
     if cabin:
-        fechas_reservadas = requests.get(f"{URL_BACKEND}/api/reservas/{cabin['id']}").json()
-        print(fechas_reservadas)
-        return render_template('reservar_cabaña.html', cabin=cabin, real_reserved_dates=fechas_reservadas)
+        datos_reservas = requests.get(f"{URL_BACKEND}/api/reservas/{cabin['slug']}").json()
+        fechas = datos_reservas.get('reservas', [])
+        print(fechas)
+        return render_template('reservar_cabaña.html', cabin=cabin, real_reserved_dates=fechas)
     else:
         # Redirigir a la página de reservar general si no encuentra la cabaña
         return redirect(url_for('cabañas'))
@@ -73,12 +75,28 @@ def mis_reservas():
         return render_template('mis_reservas.html', datos=None)
     elif request.method == 'POST':
         id_reserva = request.form.get('reservation_id')
-        response = requests.get(f"{URL_BACKEND}/reservas/{id_reserva}")
+        response = requests.get(f"{URL_BACKEND}/api/reservas/{id_reserva}")
         if response.status_code == 200:
             datos_reserva = response.json()
         else:
             datos_reserva = False
+        print(datos_reserva)
+        datos_reserva["check_in"] = datetime.strptime(datos_reserva["check_in"], "%a, %d %b %Y %H:%M:%S GMT").date()
+        datos_reserva["check_out"] = datetime.strptime(datos_reserva["check_out"], "%a, %d %b %Y %H:%M:%S GMT").date()
+
+        cantidad_noches = (datos_reserva["check_out"] - datos_reserva["check_in"]).days
+        datos_reserva["cantidad_noches"] = cantidad_noches
         return render_template('mis_reservas.html', datos=datos_reserva)
+
+@app.route('/cancelar_reserva', methods=['POST'])
+def cancelar_reserva():
+    id_reserva = request.form.get('reservation_id')
+    response = requests.post(f"{URL_BACKEND}/api/reservas/cancelar/{id_reserva}")
+    if response.status_code == 200:
+        flash('Reserva cancelada con éxito.', 'success')
+    else:
+        flash('Error al cancelar la reserva.', 'error')
+    return redirect(url_for('mis_reservas'))
 
 @app.route('/datos_reserva')
 def datos_reserva():
@@ -123,13 +141,25 @@ def procesar_reserva():
                 session.pop('reservation', None)
                 reserva_id = response.json().get("id_reserva")
 
-                return redirect(f"URL_BACKEND/confirmar_y_mostrar/{reserva_id}")
+                return render_template('confirmacion_reserva_email.html', reserva_id=reserva_id, email=email, telefono=telefono, cabin_slug=datos_reserva['cabin_slug'], check_in=datos_reserva['check_in'], check_out=datos_reserva['check_out'], cant_personas=datos_reserva['cant_personas'], total=datos_reserva['total'], experiencias=experiencias, nombre=nombre)
             else:
                 error_data = response.json()
                 return f"Error del backend: {error_data.get('error', 'Error desconocido')}", 400
         # Si no consigo mandarlo por problema del back-end devuelve error
         except requests.exceptions.RequestException as e:
             return f"Error de conexión con el backend: {str(e)}", 500
+
+@app.route('/pagar_reserva', methods=['POST'])
+def pagar_reserva():
+    id_reserva = request.form.get('reservation_id')
+    # Aquí iría la lógica de pago, que puede incluir redireccionar a una pasarela de pago
+    # Por ahora, simplemente simulamos el pago exitoso
+    response = requests.post(f"{URL_BACKEND}/api/reservas/pagar/{id_reserva}")
+    if response.status_code == 200:
+        flash('Reserva pagada con éxito.', 'success')
+    else:
+        flash('Error al procesar el pago.', 'error')
+    return redirect(url_for('mis_reservas'))
 
 if __name__ == '__main__':
     app.run(port= 5002 , debug=True)

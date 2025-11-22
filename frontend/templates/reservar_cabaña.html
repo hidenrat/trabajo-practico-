@@ -145,7 +145,7 @@
         //Por ahora, usamos estos como ejemplo
         var reservedDates = [
             {% for r in real_reserved_dates %}
-                { title: 'Reservado', start: '{{ r.start }}', end: '{{ r.end }}', display: 'block', color: '#FF5252', className: 'reserved-event' },
+                { title: 'Reservado', start: '{{ r.check_in }}', end: '{{ r.check_out }}', allDay: true, display: 'block', color: '#FF5252', className: 'reserved-event' },
             {% endfor %}
         ];
         console.log(reservedDates);

@@ -3,7 +3,7 @@ from flask_cors import CORS
 from db import get_conexion 
 from flask_mail import Mail, Message
 import js, re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # Crear la app primero
 app = Flask(__name__, template_folder='templates')
@@ -23,7 +23,7 @@ app.config['MAIL_USE_SSL'] = False
 
 mail = Mail(app)
 # Habilitar CORS para permitir que el Frontend (puerto 5002) llame a este Backend (puerto 5003)
-
+URL_FRONT = "http://localhost:5002"
 #ENDPOINT 
 
 @app.route('/api/cabanas', methods=['GET'])
@@ -236,7 +236,7 @@ def insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valid
 @app.route('/api/reservas', methods=['POST'])
 def crear_reserva():
     try:
-        data_form = request.json()
+        data_form = request.json
 
         # 1. Validar fechas
         check_in, check_out = validar_fechas(data_form['check_in'], data_form['check_out'])
@@ -261,6 +261,8 @@ def crear_reserva():
 
         # 6. Insertar la reserva
         id_reserva = insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valido)
+
+        enviar_mail_reserva(id_reserva)
 
         return jsonify({
             "success": True,
@@ -310,8 +312,9 @@ def obtener_reserva(id_reserva):
     conn.close()
 
     if not reserva:
+        print(f"No se encontró la reserva con id_reserva {id_reserva}")
         return jsonify({"error": "Reserva no encontrada"}), 404
-
+    
     return jsonify(reserva), 200
 
 # Se extraen los campos de la tabla reservas según el slug de la URL
@@ -333,6 +336,7 @@ def extraer_reservas_por_slug(slug):
         FROM reserva
         WHERE id_alojamiento = %s
         AND estado != 'cancelada'
+        AND check_out >= CURDATE()
     """, (id_alojamiento,))
 
     reservas = cursor.fetchall()
@@ -340,8 +344,9 @@ def extraer_reservas_por_slug(slug):
     cursor.close()
     conn.close()
 
-    for r in reservas:
+    for r in reservas:            
         r["check_in"] = r["check_in"].isoformat()
+        r["check_out"] = r["check_out"] + timedelta(days=1)  # Ajuste para que la fecha de salida sea exclusiva
         r["check_out"] = r["check_out"].isoformat()
 
     return reservas
@@ -425,72 +430,12 @@ def enviar_mail_reserva(id_reserva):
 
     return jsonify({"message": "Mail enviado correctamente"}), 200
 
-# Recibe la información de la funcion enviar_email y renderiza y retorna el template confirmacion_reserva_email.html
-@app.route('/confirmar_y_mostrar/<int:id_reserva>', methods=['GET'])
-def confirmar_y_mostrar(id_reserva):
-
-    # Enviar el email llamando a la función API
-    enviar_mail_reserva(id_reserva)
-
-    # Volver a traer los datos para mostrarlos en la plantilla
-    conn = get_conexion()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT
-            r.id_reserva,
-            r.nombre,
-            r.check_in,
-            r.check_out,
-            r.cant_personas,
-            r.total,
-            r.email,
-            r.telefono,
-            a.name AS alojamiento
-        FROM reserva r
-        INNER JOIN alojamientos a ON r.id_alojamiento = a.id_alojamiento
-        WHERE r.id_reserva = %s
-    """, (id_reserva,))
-
-    reserva = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    return render_template(
-        "confirmacion_reserva_email.html",
-        cabin_slug=reserva['alojamiento'],
-        reserva_id=reserva['id_reserva'],
-        check_in=reserva['check_in'],
-        check_out=reserva['check_out'],
-        cant_personas=reserva['cant_personas'],
-        experiencias=[],
-        total=reserva['total'],
-        nombre=reserva['nombre'],
-        email=reserva['email'],
-        telefono=reserva['telefono']
-    )
-
 @app.route('/api/reservas/cancelar/<int:id_reserva>', methods=['POST'])
 def cancelar_reserva(id_reserva):
 
     conn = get_conexion()
     cursor = conn.cursor(dictionary=True)
 
-    # verificar que exista
-    cursor.execute("""
-        SELECT estado 
-        FROM reserva 
-        WHERE id_reserva = %s;
-    """, (id_reserva,))  # Consulta la columna estado de la fila con id_reserva dado. Se usa placeholder %s para seguridad.
-    
-    reserva = cursor.fetchone() #devuelve el primer resultado o none si no hay nada
-
-    if not reserva:
-        cursor.close()
-        conn.close() 
-        return jsonify({"error": "Reserva no encontrada"}), 404
-                            #si no encuentra nada se cierra el cursor y la conexion y devuelve "error" reserva no encontrada y ponemos un error 404
-    
     # actualizar estado
     cursor.execute("""
         UPDATE reserva
@@ -502,10 +447,21 @@ def cancelar_reserva(id_reserva):
 
     cursor.close()
     conn.close()
-
     return jsonify({"message": "Reserva cancelada correctamente"}), 200 #Devuelve un JSON con mensaje de confirmación y código HTTP 200 (OK).
 
-
+@app.route('/api/reservas/pagar/<int:id_reserva>', methods=['POST'])
+def pagar_reserva(id_reserva):
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        UPDATE reserva
+        SET estado = 'confirmada'
+        WHERE id_reserva = %s;
+    """, (id_reserva,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"message": "Pago procesado correctamente"}), 200
 
 if __name__ == '__main__':
 
