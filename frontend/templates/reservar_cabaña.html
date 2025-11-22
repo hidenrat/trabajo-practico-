@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Reservar {{ cabin.name }} - Nordika Cabins{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/reservar.css', _external=True)}}">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    
+    <script>
+        var disableChangeHeader = true; // Cambia a true en esta página
+    </script>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
+    <div class="container">
+        <a style="scroll-behavior: smooth;" class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{url_for('static', filename='imgs/logo.svg', _external=True)}}" alt="">
+        </a>
+        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">                     
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('cabañas') }}">Todas las Cabañas</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<header class="header" id="header" style="transition: background-image 1s; background: url({{url_for('static', filename='imgs/'+ cabin.slug +'-1.jpg', _external=True)}}) no-repeat center center; background-size: cover">
+    <div class="overlay">
+        <h1 class="subtitle">Reservar</h1>
+        <h1 class="title">{{ cabin.name }}</h1>  
+    </div>  
+    <div class="shape">
+        <svg viewBox="0 0 1500 200">
+            <path d="m 0,240 h 1500.4828 v -71.92164 c 0,0 -286.2763,-81.79324 -743.19024,-81.79324 C 300.37862,86.28512 0,168.07836 0,168.07836 Z"/>
+        </svg>
+    </div>  
+    <div class="mouse-icon"><div class="wheel"></div></div>
+</header>
+
+<section class="section" style="padding-top: 100px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <p class="lead">{{ cabin.description }}</p>
+                
+                <div class="cabin-carousel-wrapper mb-4">
+                    <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
+                        <div class="cabin-carousel-track">
+                            {% for img in cabin.imagenes %}
+                                <div class="cabin-carousel-item">
+                                    <img src="{{url_for('static', filename=img.src, _external=True)}}" alt="{{ img.title }}">
+                                    <div class="cabin-carousel-caption">
+                                        <h6>{{ img.title }}</h6>
+                                        <p>{{ img.subtitle }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="mapa">
+                    <h2>{{ cabin.ubicacion_nombre }}</h2>
+                    <iframe src="{{ cabin.ubicacion_mapa }}"></iframe>
+                </div>
+                
+                <h4>Comodidades</h4>
+                <ul>
+                    {% for amenity in cabin.amenities.split(', ') %}
+                        <li>{{ amenity }}</li>
+                    {% endfor %}
+                </ul>
+                <br>
+                <h5><strong>Metros Cuadrados:</strong> {{ cabin.metros_cuadrados }} m²</h5>
+                <br>
+                <h5><strong>Baños:</strong> {{ cabin.baños }}</h5>
+                <br>
+                <h5><strong>Dormitorios:</strong> {{ cabin.dormitorios }}</h5>
+                <br>
+                <h5><strong>¿Acepta Mascotas?</strong> {% if cabin.PetFriendly %}Sí{% else %}No{% endif %}</h5>
+                <br>
+                <h4 class="mt-5">Selecciona el rango de fechas</h4>
+                <div id='calendar' class="mb-5"></div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top: 100px;">
+                    <div class="card-body">
+                        <h4 class="card-title">Detalles de Reserva</h4>
+                        <hr>
+                        <p><strong>Cabaña:</strong> {{ cabin.name }}</p>
+                        <p><strong>Capacidad:</strong> {{ cabin.capacidad }} personas</p>
+                        <p><strong>Precio por noche:</strong> <span class="text-primary font-weight-bold">${{ cabin.precio_por_noche }}</span></p>
+
+                        <form id="reservation-form" method="POST" action="{{ url_for('reservar_cabaña', cabin_slug=cabin.slug) }}">
+                            <input type="hidden" id="check_in_hidden" name="check_in" required>
+                            <input type="hidden" id="check_out_hidden" name="check_out" required>
+
+                            <div class="form-group">
+                                <label>Entrada:</label>
+                                <p id="check_in_display" class="font-weight-bold">--</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Salida:</label>
+                                <p id="check_out_display" class="font-weight-bold">--</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="guests">Número de huéspedes</label>
+                                <input type="number" class="form-control" id="guests" name="guests" min="1" max="{{ cabin.capacidad }}" required>
+                            </div>
+                            
+                            <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+                            
+                            <hr>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Total estimado:</span>
+                                <span id="total" class="font-weight-bold text-success">$0</span>
+                                <input type="hidden" id="input-total" name="total" value="0">
+                            </div>
+                            <button type="submit" id="submit-button" class="btn btn-primary btn-block" disabled>Confirmar Reserva</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+    <script>
+        var pricePerNight = {{ cabin.precio_por_noche }};
+        
+        //Si el backend ya pasa la variable 'real_reserved_dates', usa la línea de abajo.
+
+        // kkkkkkkkkkkkkkkkkkkk- var reservedDates = real_reserved_dates | tojson }};
+
+        //Por ahora, usamos estos como ejemplo
+        var reservedDates = [
+            {% for r in real_reserved_dates %}
+                { title: 'Reservado', start: '{{ r.check_in }}', end: '{{ r.check_out }}', allDay: true, display: 'block', color: '#FF5252', className: 'reserved-event' },
+            {% endfor %}
+        ];
+        console.log(reservedDates);
+    </script>
+    <script src="{{ url_for('static', filename='js/reservar-logica.js', _external=True) }}"></script>
+{% endblock %}

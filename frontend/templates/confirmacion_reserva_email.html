@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Reserva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2C7A2A;
+            text-align: center;
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .info {
+            margin-bottom: 20px;
+        }
+        .info b {
+            color: #333;
+        }
+        .experiencias-lista {
+            list-style-type: none;
+            padding: 0;
+        }
+        .experiencias-lista li {
+            background-color: #f1f1f1;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 30px;
+        }
+        button {
+            background-color: #2C7A2A;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Confirmación de Reserva</h1>
+        <p>Hola {{ nombre }},</p>
+        <p>Gracias por elegirnos. A continuación se detallan los datos de tu reserva:</p>
+        
+        <div class="info">
+            <p><b>ID de Reserva:</b> {{ reserva_id }}</p>
+            <p><b>Cabina seleccionada:</b> {{ cabin_slug }}</p>
+            <p><b>Fecha de Check-in:</b> {{ check_in }}</p>
+            <p><b>Fecha de Check-out:</b> {{ check_out }}</p>
+            <p><b>Cantidad de personas:</b> {{ cant_personas }}</p>
+            <p><b>Total de la reserva:</b> ${{ total }}</p>
+        </div>
+
+        <p><b>Experiencias adicionales seleccionadas:</b></p>
+        <ul class="experiencias-lista">
+            {% for experiencia in experiencias %}
+                <li>{{ experiencia }}</li>
+            {% else %}
+                <li>No has seleccionado ninguna experiencia adicional.</li>
+            {% endfor %}
+        </ul>
+
+        <div class="info">
+            <p><b>Datos de contacto:</b></p>
+            <p><b>Nombre:</b> {{ nombre }}</p>
+            <p><b>Email:</b> {{ email }}</p>
+            <p><b>Teléfono:</b> {{ telefono }}</p>
+        </div>
+
+        <p>Para pagar, cancelar o modificar tu reserva, haz clic en el botón de abajo.</p>
+    <a href="{{url_for('mis_reservas')}}"><button>Mi reserva</button></a>
+        <div class="footer">
+            <p>&copy; 2025 Nordika Cabins. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
