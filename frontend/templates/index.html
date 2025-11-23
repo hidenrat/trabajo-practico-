@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Nordika Cabins{% endblock %}
+
+{% block content %}
+    <nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
+        <div class="container">
+            <a style="scroll-behavior: smooth;" class="navbar-brand" href="#header">
+                <img src="{{url_for('static', filename='imgs/logo.svg', _external=True)}}" alt="">
+            </a>
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">                     
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">Quienes Somos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#portfolio">Cabañas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#experiences">Experiencias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonial">Comentarios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('cabañas') }}" class="ml-4 nav-link btn btn-primary btn-sm rounded">Reservar Cabaña</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- End Of Second Navigation -->
+
+    <!-- Page Header -->
+    <header class="header" id="header" style="transition: background-image 1s;">
+        <div class="overlay">
+            <h1 class="subtitle">Diseño y Calma</h1>
+            <h1 class="title">Nordika Cabins</h1>  
+        </div>  
+        <div class="shape">
+            <svg viewBox="0 0 1500 200">
+                <path d="m 0,240 h 1500.4828 v -71.92164 c 0,0 -286.2763,-81.79324 -743.19024,-81.79324 C 300.37862,86.28512 0,168.07836 0,168.07836 Z"/>
+            </svg>
+        </div>  
+        <div class="mouse-icon"><div class="wheel"></div></div>
+    </header>
+    <!-- End Of Page Header -->
+
+<!-- About Section -->
+<section class="section" id="about">
+    <div class="container d-flex align-items-center">
+        <div class="about-text">
+            <h1 id="about-title">Sobre Nosotros</h1>
+            <h2 id="about-subtitle">Conoce más sobre nuestra historia y misión...</h2>
+            <h5 id="about-description">En Nordika Cabins, nos especializamos en el alquiler de cabañas modernas en entornos naturales, ofreciendo una experiencia única de descanso y confort. Desde nuestra fundación en 2015, hemos crecido ofreciendo cabañas de diseño contemporáneo y servicios de alta calidad, creando espacios ideales para quienes buscan desconectar y disfrutar de la naturaleza sin renunciar al lujo y la comodidad.
+                                    Nuestra historia comenzó con un pequeño grupo de visionarios que soñaban con ofrecer un alojamiento único. Hoy, somos una empresa reconocida por la calidad de nuestras cabañas y el servicio excepcional que brindamos a nuestros huéspedes.</h5>
+        </div>
+        <div class="about-image">
+            <img src="{{url_for('static', filename='imgs/about-image.jpg', _external=True)}}" alt="Descripción de la imagen" class="img-fluid">
+        </div>
+    </div>
+    <div class="video-container">
+        <video src="{{ url_for('static', filename='imgs/video-cabaña.mp4', _external=True) }}" controls muted autoplay></video>
+    </div>
+</section>
+<!-- End OF About Section -->
+
+    <!-- Service Section -->
+    <section  id="service" class="section pt-0">
+        <div class="container">
+            <h6 class="section-title text-center" id="service-title">¡Alquilar una cabaña con Nordika Cabins es más facil de lo que imaginás!</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb-4 mb-md-0">
+                        <div class="card-body">
+                            <small class="text-primary font-weight-bold" style="font-size:24px">1</small>
+                            <h5 class="card-title mt-3"> Busca y elige tu cabaña</h5>
+                            <p class="mb-0">Visita nuestra página web, donde encontrarás una variedad de cabañas en destinos exclusivos. Explora nuestras opciones y elige la que más te guste según tus fechas y necesidades.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4 mb-md-0">
+                        <div class="card-body">
+                            <small class="text-primary font-weight-bold" style="font-size:24px">2</small>
+                            <h5 class="card-title mt-3">Reserva en minutos<h5>
+                            <p class="mb-0">Una vez que hayas elegido tu cabaña, simplemente selecciona las fechas de tu estadía. Completa tu información en nuestra plataforma segura y ¡listo! Tu reserva estará confirmada en minutos.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4 mb-md-0">
+                        <div class="card-body">
+                            <small class="text-primary font-weight-bold" style="font-size:24px">3</small>
+                            <h5 class="card-title mt-3">Disfruta de tu experiencia</h5>
+                            <p class="mb-0">Al llegar a tu cabaña, todo estará preparado para tu comodidad. Solo tienes que relajarte y disfrutar del paisaje, la tranquilidad y las comodidades que hemos preparado para ti.</p>
+                        </div>
+                    </div>
+                </div>              
+            </div>
+            <h6 class="section-subtitle text-center mb-5 pb-3" id="service-footer">¡Así de rápido y fácil es disfrutar de una experiencia única con Nordika Cabins! <br>
+¡Reserva hoy mismo y comienza tu escapada!</h6>
+        </div>
+    </section>
+    <!-- End OF Service Section -->
+    <a href="{{url_for('mis_reservas')}}" class="btn btn-danger btn-sm mb-4" style="position: fixed; bottom: 20px; right: 30px;z-index: 1000;">Mis Reservas</a>
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="section portfolio-section">
+        <div class="container">
+            <h6 class="section-title text-center">Nuestras Cabañas</h6>
+            <h6 class="section-subtitle mb-5 text-center">Espacios diseñados para que te desconectes y disfrutes.</h6>
+            <div class="filters">
+                {% for cabin in cabins %}
+                    <a href="#" data-filter=".{{ cabin.slug }}" class="{% if loop.first %}active{% endif %}">{{ cabin.name }}</a>
+                {% endfor %}
+            </div>
+            <div class="portfolio-container">
+                {% for cabin in cabins %}
+                    {% for img in cabin.imagenes %}
+                        <div class="col-md-6 col-lg-4 {{ cabin.slug }}">
+                            <div class="portfolio-item">
+                                <img src="{{ url_for('static', filename=img.src, _external=True) }}" class="img-fluid" alt="{{ img.title }}">
+                                <div class="content-holder">
+                                    <a class="img-popup" href="{{ url_for('static', filename=img.src, _external=True) }}"></a>
+                                    <div class="text-holder">
+                                        <h6 class="title">{{ img.title }}</h6>
+                                        <p class="subtitle">{{ img.subtitle }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>             
+    <!-- End of Portfolio Section -->
+
+    <!-- Blog Section -->
+    <section class="section" id="experiences">
+        <div class="container">
+            <h6 class="section-title mb-0 text-center">Experiencias Incluidas</h6>
+            <h6 class="section-subtitle mb-5 text-center">con tu alquiler de una cabaña Nordika.</h6>
+
+            <div id="experiencesCarousel" class="carousel slide" data-ride="carousel" data-interval="3000">
+                <!-- Indicadores -->
+                <ol class="carousel-indicators">
+                    {% for experience in experiences %}
+                        <li data-target="#experiencesCarousel" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
+                    {% endfor %}
+                </ol>
+
+                <!-- Slides - Una tarjeta por slide -->
+                <div class="carousel-inner">
+                    {% for experience in experiences %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <div class="row justify-content-center">
+                                <div class="col-md-6">
+                                    <div class="card border-0 mb-4">
+                                        <img src="{{ url_for('static', filename=experience.src, _external=True) }}" alt="{{ experience.title }}" class="card-img-top w-100">
+                                        <div class="card-body text-center">                         
+                                            <h6 class="card-title">{{ experience.title }}</h6>
+                                            <p>Para max. {{ experience.capacidad }} personas.</p>
+                                            <a href="javascript:void(0)" class="small text-muted">{{ experience.subdesc }}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End of Blog Section -->
+
+    <!-- Testmonial Section -->
+    <section class="section" id="testimonial">
+        <div class="container">
+            <h6 class="section-title text-center mb-0">Comentarios</h6>
+            <h6 class="section-subtitle mb-5 text-center">Lo que dicen nuestros clientes...</h6>
+            <div class="row">
+                {% for testimonial in testimonials %}
+                    <div class="col-md-4 my-3 my-md-0">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="media align-items-center mb-3">
+                                    <img class="mr-3" src="{{ url_for('static', filename=testimonial.src, _external=True) }}" alt="">
+                                    <div class="media-body">
+                                        <h6 class="mt-1 mb-0">{{ testimonial.name }}</h6>
+                                        <small class="text-muted mb-0">{{ testimonial.info }}</small>     
+                                    </div>
+                                </div>
+                                <p class="mb-0">{{ testimonial.opinion }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <!-- End of Testmonial Section -->
+{% endblock %}

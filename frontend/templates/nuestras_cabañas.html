@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuestras Cabañas - Nordika Cabins{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/reservar.css', _external=True)}}">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
+        <div class="container">
+            <a style="scroll-behavior: smooth;" class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{url_for('static', filename='imgs/logo.svg', _external=True)}}" alt="">
+            </a>
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">                     
+                    {% for cabin in cabins %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#{{ cabin.slug }}">{{ cabin.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <header class="header" id="header" style="transition: background-image 1s;">
+        <div class="overlay">
+            <h1 class="subtitle">Nordika Cabins</h1>
+            <h1 class="title">Nuestras Cabañas</h1>  
+        </div>  
+        <div class="shape">
+            <svg viewBox="0 0 1500 200">
+                <path d="m 0,240 h 1500.4828 v -71.92164 c 0,0 -286.2763,-81.79324 -743.19024,-81.79324 C 300.37862,86.28512 0,168.07836 0,168.07836 Z"/>
+            </svg>
+        </div>  
+        <div class="mouse-icon"><div class="wheel"></div></div>
+    </header>
+
+
+    {% for cabin in cabins %}
+        <section class="section cabin-section" id="{{ cabin.slug }}" style="padding-top: 100px ;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="section-title">
+                            <h2>{{ cabin.name }}</h2>
+                            <p>{{ cabin.description }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><strong>Capacidad:</strong> {{ cabin.capacidad }} personas</li>
+                            <li><strong>Comodidades:</strong> {{ cabin.amenities }}</li>
+                            <li><strong>Precio por noche:</strong> {{ cabin.precio_por_noche }}</li>
+                            <li><strong>Ubicación:</strong> {{ cabin.ubicacion }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Carrusel de imágenes -->
+                <div class="cabin-carousel-wrapper">                    
+                    <div class="cabin-carousel" data-cabin="{{ cabin.slug }}">
+                        <div class="cabin-carousel-track">
+                            {% for img in cabin.imagenes %}
+                                <div class="cabin-carousel-item">
+                                    <img src="{{url_for('static', filename=img.src, _external=True)}}" alt="{{ img.title }}">
+                                    <div class="cabin-carousel-caption">
+                                        <h6>{{ img.title }}</h6>
+                                        <p>{{ img.subtitle }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a class="btn btn-primary" id="boton-reservar" href="{{url_for('reservar_cabaña', cabin_slug=cabin.slug)}}">Más Información</a>
+                </div>
+            </div>
+        </section>
+    {% endfor %}
+{% endblock %}

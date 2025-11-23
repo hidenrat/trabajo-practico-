@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Reservas{% endblock %}
+
+{% block content %}
+<nav class="navbar custom-navbar navbar-expand-md navbar-light fixed-top" data-spy="affix" data-offset-top="10">
+    <div class="container">
+        <a style="scroll-behavior: smooth;" class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{url_for('static', filename='imgs/logo.svg', _external=True)}}" alt="">
+        </a>
+        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+<header class="header" id="header" style="transition: background-image 1s; background: url({{url_for('static', filename='imgs/header.jpg', _external=True)}}) no-repeat center center; background-size: cover">
+    <div class="overlay">
+        <h1 class="title">Buscar Reserva</h1>
+        <form action="/mis_reservas" method="POST" class="reservation-search-form" onsubmit="return validateForm()">
+            <input id="reservation-id" name="reservation_id" placeholder="Coloque el ID de su reserva aquí" required>
+            <button class="btn-primary" id="search-button" type="submit">Buscar</button>
+        </form>
+    </div>  
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert alert-dismissible fade show" role="alert">
+            {% for category, message in messages %}
+                <div class="alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+<style>
+    /* General */
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Sección de detalles de reserva */
+.reservation-details h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Tarjeta de detalles */
+.details-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.details-card p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 10px 0;
+}
+
+.details-card strong {
+    font-weight: bold;
+}
+
+/* Detalles destacados */
+.details-card span {
+    font-weight: normal;
+    color: #555;
+}
+
+/* Estados */
+.status-confirmada {
+    color: green;
+}
+
+.status-cancelada {
+    color: red;
+}
+
+.status-pendiente {
+    color: orange;
+}
+
+/* Botones */
+button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+button.btn-danger:hover {
+    background-color: #d32f2f;
+}
+
+button.btn-success {
+    background-color: #4caf50;
+    color: white;
+}
+
+button.btn-success:hover {
+    background-color: #388e3c;
+}
+
+/* Alertas */
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Formulario */
+form {
+    margin-top: 20px;
+}
+
+/* Sección sin datos */
+section.section {
+    padding-top: 50px;
+    background-color: #f9f9f9;
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: #333;
+    text-align: center;
+}
+
+p {
+    text-align: center;
+    font-size: 1rem;
+    color: #555;
+}
+
+</style>
+{% if datos %}
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <div class="reservation-details">
+                <h2>Detalles de tu Reserva</h2>
+                <div class="details-card">
+                    <p><strong>ID de Reserva:</strong> <span>{{ datos.id_reserva }}</span></p>
+                    <p><strong>Fecha de Check-In:</strong> <span>{{ datos.check_in }}</span></p>
+                    <p><strong>Fecha de Check-Out:</strong> <span>{{ datos.check_out }}</span></p>
+                    <p><strong>Cabaña Elegida:</strong> <span>{{ datos.alojamiento }}</span></p>
+                    <p><strong>Estado:</strong> <span class="status-{{ datos.estado|lower }}">{{ datos.estado }}</span></p>
+                    <p><strong>Cantidad de Pasajeros:</strong> <span>{{ datos.cant_personas }}</span></p>
+                    <p><strong>Cantidad de Noches:</strong> <span>{{ datos.cantidad_noches }}</span></p>
+                    
+                    {% if datos.estado|lower == 'confirmada' %}
+                        <p><strong>Total Pagado:</strong> <span class="total">${{ datos.total }}</span></p>
+                    {% elif datos.estado|lower == 'cancelada' %}
+                        <p><strong>Total Reembolsado:</strong> <span class="total">${{ datos.total }}</span></p>
+                    {% elif datos.estado|lower == 'pendiente' %}
+                        <p><strong>Total a Pagar:</strong> <span class="total">${{ datos.total }}</span></p>
+                    {% endif %}
+                    
+                    <p><strong>Cabaña a Nombre de:</strong> <span>{{ datos.nombre }}</span></p>
+                </div>
+
+                {% if datos.estado|lower != 'cancelada' %}
+                    <form method="POST" action="{{ url_for('cancelar_reserva') }}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');">
+                        <input type="hidden" name="reservation_id" value="{{ datos.id_reserva }}">
+                        <button class="btn btn-danger" type="submit">Cancelar Reserva</button>
+                    </form>
+                {% elif datos.estado|lower == 'cancelada' %}
+                    <div class="alert alert-danger" role="alert">
+                        La reserva ya ha sido cancelada.
+                    </div>
+                {% endif %}
+
+                {% if datos.estado|lower == 'pendiente' %}
+                    <form action="{{ url_for('pagar_reserva') }}" method="POST" style="margin-top: 15px;">
+                        <input type="hidden" name="reservation_id" value="{{ datos.id_reserva }}">
+                        <button class="btn btn-success" type="submit">Pagar Reserva</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% elif datos is false %}
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <h2>No se encontró ninguna reserva con el ID proporcionado.</h2>
+            <p>Por favor, verifique el ID de la reserva o intente nuevamente.</p>
+        </div>
+    </section>
+{% elif datos is none %}
+    <section class="section" style="padding-top: 100px;">
+        <div class="container">
+            <h2>Por favor, ingrese un ID de reserva para buscar.</h2>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

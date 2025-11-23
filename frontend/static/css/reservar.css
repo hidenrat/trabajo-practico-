@@ -1,0 +1,248 @@
+.section-img{
+    margin-top: 20px;
+    text-align: center;
+}
+.section-img img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-images {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 15px;
+    align-items: stretch;
+    align-content: center;
+    justify-content: space-around;
+}
+
+/* Estilos para el carrusel de cabañas */
+.cabin-section {
+    padding: 60px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.cabin-carousel-wrapper {
+    position: relative;
+    margin-top: 30px;
+    overflow: hidden;
+    padding: 0 60px;
+}
+
+.cabin-carousel {
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+}
+
+.cabin-carousel:active {
+    cursor: grabbing;
+}
+
+.cabin-carousel-track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.cabin-carousel-item {
+    flex: 0 0 calc(33.333% - 14px);
+    min-width: calc(33.333% - 14px);
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cabin-carousel-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.cabin-carousel-item img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+.cabin-carousel-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.527), transparent);
+    color: white;
+    padding: 15px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.cabin-carousel-item:hover .cabin-carousel-caption {
+    transform: translateY(0);
+}
+
+.cabin-carousel-caption h6 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.cabin-carousel-caption p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Botones de navegación */
+.cabin-carousel-prev {
+    left: 0;
+}
+
+.cabin-carousel-next {
+    right: 0;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .cabin-carousel-item {
+        flex: 0 0 calc(50% - 10px);
+        min-width: calc(50% - 10px);
+    }
+    
+    .cabin-carousel-wrapper {
+        padding: 0 50px;
+    }
+    
+    .cabin-carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .cabin-carousel-item {
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
+    
+    .cabin-carousel-wrapper {
+        padding: 0 45px;
+    }
+    
+    .cabin-carousel-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+}
+
+/* Indicadores de posición (opcional) */
+.cabin-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.cabin-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cabin-carousel-dot.active {
+    background: #ff6b35;
+    width: 24px;
+    border-radius: 4px;
+}
+
+/* De acá para abajo, son funciones para el calendario*/
+
+/*Punteros*/
+
+/* FullCalendar usa .fc-daygrid-day-frame.fc-day-other para los días de otros meses */
+.fc-daygrid-day:not(.fc-day-past) {
+    cursor: pointer;
+}
+
+.fc-daygrid-body {
+    cursor: grab;
+}
+.fc-daygrid-body:active {
+    cursor: grabbing;
+}
+
+/* Cursor 'Bloqueado' para días pasados y días fuera del mes actual */
+.fc-day-past, 
+.fc-daygrid-day.fc-day-other {
+    cursor: not-allowed !important;
+}
+
+
+/*Estilos para fechas pasadas al dia de hoy*/
+
+.fc-day-past {
+    background-color: #f0f0f0 !important;
+    opacity: 0.8;
+}
+
+.fc-daygrid-day-frame.fc-day-selected {
+    background-color: #4CAF50 !important;
+}
+.fc-daygrid-day.fc-day-selected {
+    background-color: #A5D6A7 !important;
+}
+.fc-highlight {
+    background: #4CAF50 !important;
+    opacity: 0.5 !important;
+}
+
+/*Estilos para dias reservados*/
+
+.reserved-event {
+    background-color: #FF5252 !important;
+    border-color: #D32F2F !important;
+    cursor: not-allowed !important;
+}
+
+.fc-event-title-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc-event-title.reserved-text {
+    color: #424242; 
+    font-weight: bold !important;
+    text-align: center;
+    pointer-events: none; 
+    z-index: 10;
+
+}
+
+.mapa {
+    margin-top: 20px;
+    text-align: center;
+    border: 0;
+    border-radius: 10px;
+    padding-bottom: 20px;
+}
+
+.mapa iframe {
+    width: 610px;
+    height: 300px;
+    border: none;
+    border-radius: 10px;
+}
