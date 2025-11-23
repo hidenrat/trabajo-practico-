@@ -228,6 +228,20 @@ def insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valid
 
     return id_reserva
 
+def insertar_servicio_reserva(id_reserva, id_servicio):
+    conn = get_conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO servicios_reserva (id_reserva, id_servicio)
+        VALUES (%s, %s)
+    """, (id_reserva, id_servicio))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 
 @app.route('/api/reservas', methods=['POST'])
 def crear_reserva():
@@ -257,6 +271,12 @@ def crear_reserva():
 
         # 6. Insertar la reserva
         id_reserva = insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valido)
+
+        #7. insertar servicio extra( si hay )
+        experiencias = data_form.get("experiencias", []) 
+        for exp in experiencias:
+            insertar_servicio_reserva(id_reserva, exp) 
+            
 
         return jsonify({
             "success": True,
@@ -475,6 +495,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
