@@ -22,12 +22,12 @@ CORS(app)
 
 #ENDPOINT 
 
-@app.route('/api/cabanas', methods=['GET'])
+@app.route('/api/cabanas', methods=['GET']) # define un enpoint GET en la ruta /api/cabanas
 def get_cabanas():
-    conn = get_conexion()
-    cursor = conn.cursor(dictionary=True)
+    conn = get_conexion() #crea la conexion con la base de datos
+    cursor = conn.cursor(dictionary=True)# crea un cursor que retorna diccionarios
 
-    # Obtiene los alojamientos
+    #ejecuta una consulta SQL para obtener todos los alojamientos
     cursor.execute("""
         SELECT 
             id_alojamiento AS id,
@@ -45,9 +45,9 @@ def get_cabanas():
             petFriendly
         FROM alojamientos;
     """)
-    alojamientos = cursor.fetchall()
+    alojamientos = cursor.fetchall() #Recupera todos los resultados como una lista de diccionarios
 
-    # Recorre cada alojamiento para obtener sus imágenes
+    #ejecuta una consulta para obtener sus imágenes usando el id_alojamiento
     for alojamiento in alojamientos:
         cursor.execute("""
             SELECT src, title, subtitle
@@ -56,18 +56,20 @@ def get_cabanas():
         """, (alojamiento['id'],))
 
         imagenes = cursor.fetchall()
-        alojamiento['imagenes'] = imagenes
+        alojamiento['imagenes'] = imagenes #Agrega las imágenes al objeto alojamiento
 
-    cursor.close()
-    conn.close()
+    cursor.close()# cerras el cursor 
+    conn.close()#cerras la conexion
 
     return jsonify(alojamientos)
 
 
 @app.route('/api/servicios', methods=['GET'])
 def obtener_servicio ():
-    conn = get_conexion()
-    cursor = conn.cursor(dictionary=True)
+    conn = get_conexion()  #crea la conexion con la base de datos   
+    cursor = conn.cursor(dictionary=True) # crea uun cursor que devuelve diccionarios
+
+    #obtiene los datos solicitados de la tabla servicios_extra
     cursor.execute("""
         SELECT 
              id_servicio,
@@ -79,7 +81,7 @@ def obtener_servicio ():
         FROM servicios_extras
     """)
 
-    servicios = cursor.fetchall()
+    servicios = cursor.fetchall()#Recupera todos los resultados como una lista de diccionarios
     cursor.close()
     cunn.close()
     return jsonify(servicios), 200 
@@ -87,8 +89,8 @@ def obtener_servicio ():
 # En caso de que se quisiera obtener un alojamiento en particular
 @app.route('/api/cabanas/<slug>', methods=['GET'])
 def get_cabana(slug):
-    conn = get_conexion()
-    cursor = conn.cursor(dictionary=True)
+    conn = get_conexion() # crea la conexion con la base de datos
+    cursor = conn.cursor(dictionary=True) # creamos un cursor que devuelve diccionarios
 
     # Obtener datos del alojamiento especifico
     cursor.execute("""
@@ -110,7 +112,7 @@ def get_cabana(slug):
         WHERE slug = %s;
     """, (slug,))
 
-    alojamiento = cursor.fetchone()
+    alojamiento = cursor.fetchone() #obtiene una sola fila del resultado de la consulta SQL.
 
     if not alojamiento:
         cursor.close()
@@ -125,20 +127,20 @@ def get_cabana(slug):
     """, (alojamiento["id"],))
 
     imagenes = cursor.fetchall()
-    alojamiento["imagenes"] = imagenes
+    alojamiento["imagenes"] = imagenes #agrega las imagenes al objeto alojamento
 
-    cursor.close()
-    conn.close()
+    cursor.close() # cierra el cursor
+    conn.close() #cierra la conexion
 
     return jsonify(alojamiento), 200
 
-def validar_fechas(check_in_str, check_out_str):
+def validar_fechas(check_in_str, check_out_str): # valida las fechas check_in, check_out
     check_in = datetime.strptime(check_in_str, "%Y-%m-%d").date()
     check_out = datetime.strptime(check_out_str, "%Y-%m-%d").date()
 
     if check_in >= check_out:
-        raise ValueError("La fecha de entrada debe ser menor a la de salida")
-
+        raise ValueError("La fecha de entrada debe ser menor a la de salida") 
+                                                                                #convierte los strings de fecha al objeto date
     if check_in < date.today():
         raise ValueError("La fecha de entrada no puede estar en el pasado")
 
@@ -152,9 +154,9 @@ def obtener_alojamiento_por_slug(slug):
         SELECT id_alojamiento, capacidad
         FROM alojamientos
         WHERE slug = %s
-    """, (slug,))
+    """, (slug,))  # Busca el alojamiento por su slug
 
-    fila = cursor.fetchone()
+    fila = cursor.fetchone() #obtiene una sola fila del resultado
 
     cursor.close()
     conn.close()
@@ -164,20 +166,20 @@ def obtener_alojamiento_por_slug(slug):
 
     return fila 
 
-def validar_capacidad(capacidad, num_personas):
+def validar_capacidad(capacidad, num_personas): # verifica que el número de personas no exceda la capacidad máxima
     if num_personas > capacidad:
         raise ValueError(f"Capacidad excedida. Máximo permitido: {capacidad}")
 
 
-def validar_email(email):
+def validar_email(email): #Define patrón regex para validar formato de email
     patron = r"^[\w\.-]+@[\w\.-]+\.\w+$"
     
     if not re.match(patron, email):
-        raise ValueError("El email ingresado no es válido.")
+        raise ValueError("El email ingresado no es válido.") #Si el email no coincide con el patrón, lanza error
     
     return email
 
-def hay_superposicion(id_alojamiento, check_in, check_out):
+def hay_superposicion(id_alojamiento, check_in, check_out): #Conexión a BD (cursor normal, sin diccionarios)
     conn = get_conexion()
     cursor = conn.cursor()
 
@@ -197,7 +199,7 @@ def hay_superposicion(id_alojamiento, check_in, check_out):
         check_in, check_out,
         check_in, check_out,
         check_in, check_out
-    ))
+    )) #Busca reservas que se superpongan con las fechas solicitadas, Verifica 4 tipos de superposición posible
 
     cont = cursor.fetchone()[0]
 
@@ -218,10 +220,10 @@ def insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valid
     """, (
         id_alojamiento, check_in, check_out, data_form['cant_personas'], 
         data_form['total'], data_form['nombre'], email_valido, 
-        data_form['telefono']))
+        data_form['telefono'])) #Inserta nueva reserva en la BD con estado "confirmada"
 
     conn.commit()
-    id_reserva = cursor.lastrowid
+    id_reserva = cursor.lastrowid #Obtiene el ID auto-generado de la nueva reserva
 
     cursor.close()
     conn.close()
@@ -235,9 +237,9 @@ def insertar_servicio_reserva(id_reserva, id_servicio):
     cursor.execute("""
         INSERT INTO servicios_reserva (id_reserva, id_servicio)
         VALUES (%s, %s)
-    """, (id_reserva, id_servicio))
+    """, (id_reserva, id_servicio)) #Inserta relación entre reserva y servicio extra
 
-    conn.commit()
+    conn.commit() #Confirma y cierra conexión
     cursor.close()
     conn.close()
 
@@ -495,6 +497,7 @@ def cancelar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
