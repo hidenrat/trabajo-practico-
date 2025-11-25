@@ -1,0 +1,5 @@
+Flask
+flask-cors
+Flask-Mail
+mysql-connector-python
+requests
