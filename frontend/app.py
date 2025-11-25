@@ -71,22 +71,42 @@ def reservar_cabaña(cabin_slug):
 
 @app.route('/mis_reservas', methods=['GET', 'POST'])
 def mis_reservas():
+    # soporte para GET?reservation_id=123 para recargar la página después de actualizar
     if request.method == 'GET':
-        return render_template('mis_reservas.html', datos=None)
-    elif request.method == 'POST':
+        reservation_id = request.args.get('reservation_id')
+        if not reservation_id:
+            return render_template('mis_reservas.html', datos=None)
+        # si viene reservation_id en query params, cargar datos como en POST
+        id_reserva = reservation_id
+    else:
         id_reserva = request.form.get('reservation_id')
-        response = requests.get(f"{URL_BACKEND}/api/reservas/{id_reserva}")
-        if response.status_code == 200:
-            datos_reserva = response.json()
-        else:
-            datos_reserva = False
-        print(datos_reserva)
-        datos_reserva["check_in"] = datetime.strptime(datos_reserva["check_in"], "%a, %d %b %Y %H:%M:%S GMT").date()
-        datos_reserva["check_out"] = datetime.strptime(datos_reserva["check_out"], "%a, %d %b %Y %H:%M:%S GMT").date()
 
-        cantidad_noches = (datos_reserva["check_out"] - datos_reserva["check_in"]).days
-        datos_reserva["cantidad_noches"] = cantidad_noches
-        return render_template('mis_reservas.html', datos=datos_reserva)
+    # consultar datos de la reserva
+    response = requests.get(f"{URL_BACKEND}/api/reservas/{id_reserva}")
+    if response.status_code == 200:
+        datos_reserva = response.json()
+    else:
+        datos_reserva = False
+
+    if not datos_reserva:
+        return render_template('mis_reservas.html', datos=False)
+
+    # parsear fechas (vienen en formato RFC) y calcular noches
+    datos_reserva["check_in"] = datetime.strptime(datos_reserva["check_in"], "%a, %d %b %Y %H:%M:%S GMT").date()
+    datos_reserva["check_out"] = datetime.strptime(datos_reserva["check_out"], "%a, %d %b %Y %H:%M:%S GMT").date()
+    cantidad_noches = (datos_reserva["check_out"] - datos_reserva["check_in"]).days
+    datos_reserva["cantidad_noches"] = cantidad_noches
+
+    # obtener experiencias asignadas (ids)
+    resp2 = requests.get(f"{URL_BACKEND}/api/reservas/{id_reserva}/experiencias")
+    if resp2.status_code == 200:
+        exp_list = resp2.json()
+        # convertir a lista de ids para facilitar checks en template
+        datos_reserva['experiencias'] = [int(e['id_servicio']) for e in exp_list]
+    else:
+        datos_reserva['experiencias'] = []
+
+    return render_template('mis_reservas.html', datos=datos_reserva, experiencias=experiencias)
 
 @app.route('/cancelar_reserva', methods=['POST'])
 def cancelar_reserva():
@@ -97,6 +117,28 @@ def cancelar_reserva():
     else:
         flash('Error al cancelar la reserva.', 'error')
     return redirect(url_for('mis_reservas'))
+
+
+@app.route('/mis_reservas/actualizar_experiencias', methods=['POST'])
+def actualizar_experiencias():
+    """Recibe formulario con reservation_id y múltiples experiencias (ids) y llama al backend para actualizar.
+       Luego redirige a /mis_reservas?reservation_id=xxx para recargar.
+    """
+    id_reserva = request.form.get('reservation_id')
+    experiencias_seleccionadas = request.form.getlist('experiencias')
+    # llamar al backend
+    try:
+        resp = requests.post(f"{URL_BACKEND}/api/reservas/{id_reserva}/experiencias", json={"experiencias": experiencias_seleccionadas, "total": request.form.get('total')})
+    except requests.exceptions.RequestException as e:
+        flash('Error conectando con el backend al actualizar experiencias.', 'error')
+        return redirect(url_for('mis_reservas'))
+
+    if resp.status_code == 200:
+        # redirigir a la misma página con el id para recargar los datos
+        return redirect(url_for('mis_reservas', reservation_id=id_reserva))
+    else:
+        flash('No se pudo actualizar las experiencias.', 'error')
+        return redirect(url_for('mis_reservas'))
 
 @app.route('/datos_reserva')
 def datos_reserva():
@@ -113,40 +155,47 @@ def procesar_reserva():
         email = request.form.get('email')
         telefono = request.form.get('telefono')
         documento = request.form.get('documento')
-        
+        total = request.form.get('total')
         reservar_data = session.get('reservation')
-
+        for cabin in cabins:
+            if cabin['slug'] == reservar_data['cabin_slug']:
+                cabin_name = cabin['name']
+                break
         if not reservar_data:
             return "Error: No hay datos de reserva en sesión", 400
         # Guardo los datos de los dos formularios en un diccionario
         experiencias_seleccionadas = request.form.getlist("experiencias")
-        datos_reserva = {
+        selected_objs = [exp for exp in experiencias if str(exp['id_servicio']) in experiencias_seleccionadas]
+
+        payload = {
+            'cabin_name': cabin_name,
             'cabin_slug': reservar_data['cabin_slug'],
-            'nombre': nombre,
-            'email': email,
-            'telefono': telefono,
             'check_in': reservar_data['check_in'],
             'check_out': reservar_data['check_out'],
             'cant_personas': reservar_data['cant_personas'],
-            'total': reservar_data['total'],
+            'total': total,
+            'nombre': nombre,
+            'email': email,
+            'telefono': telefono,
+            'documento': documento,
             'experiencias': experiencias_seleccionadas
         }
-    
+
         try:
             response = requests.post(
-                f"{URL_BACKEND}/api/reservas",
-                json=datos_reserva,
+                f"{URL_BACKEND}/api/reservas/complete",
+                json=payload,
                 headers={'Content-Type': 'application/json'}
             )
-            
-            if response.status_code == 201:
-                session.pop('reservation', None)
-                reserva_id = response.json().get("id_reserva")
 
-                return render_template('confirmacion_reserva_email.html', reserva_id=reserva_id, email=email, telefono=telefono, cabin_slug=datos_reserva['cabin_slug'], check_in=datos_reserva['check_in'], check_out=datos_reserva['check_out'], cant_personas=datos_reserva['cant_personas'], total=datos_reserva['total'], experiencias=experiencias, nombre=nombre)
+            if response.status_code == 201:
+                reserva_id = response.json().get("id_reserva")
+                session.pop('reservation', None)
+                # Mostrar confirmación localmente con los datos seleccionados
+                return render_template('confirmacion_reserva_email.html', datos=payload, reserva_id=reserva_id, experiencias=selected_objs)
             else:
                 error_data = response.json()
-                return f"Error del backend: {error_data.get('error', 'Error desconocido')}", 400
+                return f"Error al procesar la reserva: {error_data.get('error', error_data)}", 400
         # Si no consigo mandarlo por problema del back-end devuelve error
         except requests.exceptions.RequestException as e:
             return f"Error de conexión con el backend: {str(e)}", 500

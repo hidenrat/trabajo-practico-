@@ -179,8 +179,47 @@ p {
                     {% endif %}
                     
                     <p><strong>Cabaña a Nombre de:</strong> <span>{{ datos.nombre }}</span></p>
+                    <p><strong>Correo Electrónico:</strong> <span>{{ datos.email }}</span></p>
+                    <p><strong>Teléfono de Contacto:</strong> <span>{{ datos.telefono }}</span></p>
+                    <p><strong>Número de Documento:</strong> <span>{{ datos.documento }}</span></p>
+                    <p><strong>Experiencias Adicionales:</strong> 
+                        <span>
+                            {% if datos.experiencias %}
+                                {% for id_exp in datos.experiencias %}
+                                    {% set exp = (experiencias | selectattr('id_servicio','equalto', id_exp) | list).0 %}
+                                    {% if exp %}
+                                        <p style="color:rgb(68, 44, 17)"> <strong>{{ exp.title }}</strong> ( ${{ exp.precio }} )</p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                No se han seleccionado experiencias adicionales.
+                            {% endif %}
+                        </span>
+                        {% if datos.estado|lower != 'cancelada' %}
+                            <!-- Form para editar experiencias -->
+                            <div style="margin-top:10px;">
+                                <button id="edit-exp-button" class="btn btn-primary" type="button" onclick="document.getElementById('edit-experiencias-panel').style.display='block'">Editar experiencias</button>
+                                <div id="edit-experiencias-panel" style="display:none; margin-top:10px;">
+                                    <form method="POST" action="{{ url_for('actualizar_experiencias') }}">
+                                        <input type="hidden" name="reservation_id" value="{{ datos.id_reserva }}">
+                                        <div style="max-height:200px; overflow:auto;">
+                                            {% for exp in experiencias %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="experiencias" value="{{ exp.id_servicio }}" id="exp-{{ exp.id_servicio }}" {% if exp.id_servicio in datos.experiencias %}checked{% endif %}>
+                                                    <label class="form-check-label" for="exp-{{ exp.id_servicio }}">{{ exp.title }} — ${{ exp.precio }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div style="margin-top:10px;">
+                                            <button id="save-exp-button" type="submit" class="btn btn-success">Guardar experiencias</button>
+                                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('edit-experiencias-panel').style.display='none'">Cancelar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </p>
                 </div>
-
                 {% if datos.estado|lower != 'cancelada' %}
                     <form method="POST" action="{{ url_for('cancelar_reserva') }}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');">
                         <input type="hidden" name="reservation_id" value="{{ datos.id_reserva }}">

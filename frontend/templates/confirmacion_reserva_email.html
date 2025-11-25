@@ -64,36 +64,39 @@
 <body>
     <div class="container">
         <h1>Confirmación de Reserva</h1>
-        <p>Hola {{ nombre }},</p>
+        <p>Hola {{ datos.nombre }},</p>
         <p>Gracias por elegirnos. A continuación se detallan los datos de tu reserva:</p>
         
         <div class="info">
             <p><b>ID de Reserva:</b> {{ reserva_id }}</p>
-            <p><b>Cabina seleccionada:</b> {{ cabin_slug }}</p>
-            <p><b>Fecha de Check-in:</b> {{ check_in }}</p>
-            <p><b>Fecha de Check-out:</b> {{ check_out }}</p>
-            <p><b>Cantidad de personas:</b> {{ cant_personas }}</p>
-            <p><b>Total de la reserva:</b> ${{ total }}</p>
+            <p><b>Cabina seleccionada:</b> {{ datos.cabin_name }}</p>
+            <p><b>Fecha de Check-in:</b> {{ datos.check_in }}</p>
+            <p><b>Fecha de Check-out:</b> {{ datos.check_out }}</p>
+            <p><b>Cantidad de personas:</b> {{ datos.cant_personas }}</p>
+            <p><b>Total de la reserva:</b> ${{ datos.total }}</p>
         </div>
 
         <p><b>Experiencias adicionales seleccionadas:</b></p>
         <ul class="experiencias-lista">
-            {% for experiencia in experiencias %}
-                <li>{{ experiencia }}</li>
+            {% if experiencias %}
+                {% for experiencia in experiencias %}
+                    <li>{{ experiencia.title }} - ${{ experiencia.precio }}</li>
+                {% endfor %}
             {% else %}
                 <li>No has seleccionado ninguna experiencia adicional.</li>
-            {% endfor %}
+            {% endif %}
         </ul>
 
         <div class="info">
             <p><b>Datos de contacto:</b></p>
-            <p><b>Nombre:</b> {{ nombre }}</p>
-            <p><b>Email:</b> {{ email }}</p>
-            <p><b>Teléfono:</b> {{ telefono }}</p>
+            <p><b>Nombre:</b> {{ datos.nombre }}</p>
+            <p><b>Email:</b> {{ datos.email }}</p>
+            <p><b>Teléfono:</b> {{ datos.telefono }}</p>
+            <p><b>Documento de Identidad:</b> {{ datos.documento }}</p>
         </div>
 
         <p>Para pagar, cancelar o modificar tu reserva, haz clic en el botón de abajo.</p>
-    <a href="{{url_for('mis_reservas')}}"><button>Mi reserva</button></a>
+    <a href="{{url_for('mis_reservas', reservation_id=reserva_id)}}"><button>Mi reserva</button></a>
         <div class="footer">
             <p>&copy; 2025 Nordika Cabins. Todos los derechos reservados.</p>
         </div>

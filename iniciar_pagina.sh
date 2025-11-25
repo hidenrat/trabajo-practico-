@@ -6,14 +6,14 @@ echo "Acordar que para iniciarlo, antes de debe dar los permisos asi: 'chmod +x 
 
 # --- 1. Iniciando SERVIDOR BACKEND (API - Puerto 5003) ---
 # El '&' al final pone el proceso en segundo plano.
-python backend/app_back.py & 
+python3 backend/app_back.py & 
 BACKEND_PID=$! # Guarda el ID del proceso del backend para poder detenerlo
 
 echo "Backend iniciado en Puerto 5003 (PID: $BACKEND_PID)"
 sleep 1 # Pausa para dar tiempo a iniciar
 
 # --- 2. Iniciando SERVIDOR FRONTEND (WEB - Puerto 5002) ---
-python frontend/app.py &
+python3 frontend/app.py &
 FRONTEND_PID=$! # Guarda el ID del proceso del frontend
 
 echo "Frontend iniciado en Puerto 5002 (PID: $FRONTEND_PID)"

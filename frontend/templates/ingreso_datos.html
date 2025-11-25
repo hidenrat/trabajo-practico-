@@ -79,13 +79,13 @@
                         <input type="checkbox"
                                class="experiencia"
                                name="experiencias"
-                               value="{{ experiencia[1] }}"
-                               data-precio="{{ experiencia[4] }}">
+                               value="{{ experiencia.id_servicio }}"
+                               data-precio="{{ experiencia.precio }}">
                         
                         <span class="circle"></span>
                         
                         <span class="experiencia-title">
-                            {{ experiencia[0] }} - ${{ experiencia[4] }}
+                            {{ experiencia.title }} - ${{ experiencia.precio }}
                         </span>
                     </label>
                     <br>

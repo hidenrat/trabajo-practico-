@@ -2,7 +2,7 @@ from flask import Flask, jsonify, render_template, request, redirect
 from flask_cors import CORS
 from db import get_conexion 
 from flask_mail import Mail, Message
-import js, re
+import re
 from datetime import date, datetime, timedelta
 
 # Crear la app primero
@@ -74,7 +74,7 @@ def obtener_servicio ():
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT 
-             id_servicio,
+            id_servicio,
             title,
             capacidad,
             subdesc,
@@ -233,6 +233,81 @@ def insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valid
     return id_reserva
 
 
+def send_mail_for_reserva(id_reserva):
+    """Helper: obtiene datos de la reserva y envía el correo; lanza Exception si falla."""
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            r.id_reserva,
+            r.nombre,
+            r.check_in,
+            r.check_out,
+            r.cant_personas,
+            r.total,
+            r.email,
+            r.telefono,
+            a.name AS alojamiento
+        FROM reserva r
+        INNER JOIN alojamientos a ON r.id_alojamiento = a.id_alojamiento
+        WHERE r.id_reserva = %s
+    """, (id_reserva,))
+
+    reserva = cursor.fetchone()
+
+    # obtener experiencias asociadas
+    cursor.execute("""
+        SELECT s.title, s.subdesc, s.precio
+        FROM servicios_reserva sr
+        JOIN servicios_extras s ON sr.id_servicio = s.id_servicio
+        WHERE sr.id_reserva = %s
+    """, (id_reserva,))
+    experiencias_rows = cursor.fetchall()
+
+
+    cursor.close()
+    conn.close()
+
+    if not reserva:
+        raise ValueError("reserva no encontrada")
+
+    experiencias_list = []
+    for e in (experiencias_rows or []):
+        experiencias_list.append({
+            'title': e.get('title'),
+            'subdesc': e.get('subdesc'),
+            'precio': e.get('precio')
+        })
+
+    mis_reservas_url = f"{URL_FRONT}/mis_reservas?reserva_id={id_reserva}"
+
+    msg = Message(
+        'Confirmación de Reserva',
+        sender=app.config.get('MAIL_DEFAULT_SENDER'),
+        recipients=[reserva["email"]]
+    )
+
+    msg.html = render_template(
+        'confirmacion_reserva_email.html',
+        cabin_slug=reserva['alojamiento'],
+        reserva_id=id_reserva,
+        check_in=reserva['check_in'],
+        check_out=reserva['check_out'],
+        cant_personas=reserva['cant_personas'],
+        experiencias=experiencias_list,
+        total=reserva['total'],
+        nombre=reserva['nombre'],
+        email=reserva['email'],
+        telefono=reserva['telefono'],
+        mis_reservas_url=mis_reservas_url
+    )
+
+    mail.send(msg)
+
+
+
+
 @app.route('/api/reservas', methods=['POST'])
 def crear_reserva():
     try:
@@ -259,10 +334,14 @@ def crear_reserva():
                 "error": "Las fechas seleccionadas no están disponibles"
             }), 400
 
-        # 6. Insertar la reserva
+        # 6. Insertar la reserva (método original sin experiencias)
         id_reserva = insertar_reserva(id_alojamiento, data_form, check_in, check_out, email_valido)
 
-        enviar_mail_reserva(id_reserva)
+        # Enviar mail (intento, no falla la creación si el mail falla)
+        try:
+            send_mail_for_reserva(id_reserva)
+        except Exception:
+            pass
 
         return jsonify({
             "success": True,
@@ -377,58 +456,13 @@ def retornar_reservas_por_slug(slug):
 # Se encarga de enviar los campos de la tabla de reserva de un id en específico y renderiza el tamplate de confirmacion_reserva_email
 @app.route('/api/reservas/enviar-mail/<int:id_reserva>', methods=['POST'])
 def enviar_mail_reserva(id_reserva):
-    conn = get_conexion()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT
-            r.id_reserva,
-            r.nombre,
-            r.check_in,
-            r.check_out,
-            r.cant_personas,
-            r.total,
-            r.email,
-            r.telefono,
-            a.name AS alojamiento
-        FROM reserva r
-        INNER JOIN alojamientos a ON r.id_alojamiento = a.id_alojamiento
-        WHERE r.id_reserva = %s
-    """, (id_reserva,))
-
-    reserva = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    if not reserva:
-        return jsonify({"error": "reserva no encontrada"}), 404
-
-    msg = Message(
-        'Confirmación de Reserva',
-        sender='practicotrabajo74@gmail.com',
-        recipients=[reserva["email"]]
-    )
-
-    msg.html = render_template(
-        'confirmacion_reserva_email.html',
-        cabin_slug=reserva['alojamiento'],
-        reserva_id=id_reserva,
-        check_in=reserva['check_in'],
-        check_out=reserva['check_out'],
-        cant_personas=reserva['cant_personas'],
-        experiencias=[],
-        total=reserva['total'],
-        nombre=reserva['nombre'],
-        email=reserva['email'],
-        telefono=reserva['telefono'],
-    )
-
     try:
-        mail.send(msg)
+        send_mail_for_reserva(id_reserva)
+        return jsonify({"message": "Mail enviado correctamente"}), 200
+    except ValueError:
+        return jsonify({"error": "reserva no encontrada"}), 404
     except Exception as e:
         return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
-
-    return jsonify({"message": "Mail enviado correctamente"}), 200
 
 @app.route('/api/reservas/cancelar/<int:id_reserva>', methods=['POST'])
 def cancelar_reserva(id_reserva):
@@ -448,6 +482,181 @@ def cancelar_reserva(id_reserva):
     cursor.close()
     conn.close()
     return jsonify({"message": "Reserva cancelada correctamente"}), 200 #Devuelve un JSON con mensaje de confirmación y código HTTP 200 (OK).
+
+
+@app.route('/api/reservas/<int:id_reserva>/experiencias', methods=['GET', 'POST'])
+def manejar_experiencias_reserva(id_reserva):
+    """GET: devuelve lista de id_servicio asignados a la reserva
+       POST: recibe JSON {"experiencias": [id_servicio, ...]} y reemplaza las relaciones
+    """
+    if request.method == 'GET':
+        conn = get_conexion()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT se.id_servicio, s.title, s.precio
+            FROM servicios_reserva se
+            JOIN servicios_extras s ON se.id_servicio = s.id_servicio
+            WHERE se.id_reserva = %s
+        """, (id_reserva,))
+        filas = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        # devolver lista de ids y datos
+        return jsonify([{"id_servicio": f['id_servicio'], "title": f['title'], "precio": f['precio']} for f in filas]), 200
+
+    # POST -> actualizar
+    payload = request.get_json() or {}
+    nuevas = payload.get('experiencias')
+    if nuevas is None:
+        return jsonify({"error": "Se debe enviar la lista 'experiencias'"}), 400
+
+    # validar que sea lista de enteros
+    try:
+        nuevas_ids = [int(x) for x in nuevas]
+    except Exception:
+        return jsonify({"error": "Formato inválido en 'experiencias'"}), 400
+
+    conn = get_conexion()
+    cursor = conn.cursor()
+    try:
+        # 1. Obtener servicios actuales
+        cursor.execute("""
+            SELECT id_servicio FROM servicios_reserva
+            WHERE id_reserva = %s
+        """, (id_reserva,))
+        servicios_actuales = {row[0] for row in cursor.fetchall()}
+
+        # Convert listas a sets
+        servicios_nuevos = set(nuevas_ids)
+
+        # 2. Determinar cuáles se agregan y cuáles se eliminan
+        servicios_agregar = servicios_nuevos - servicios_actuales
+        servicios_eliminar = servicios_actuales - servicios_nuevos
+
+        # 3. AGREGAR nuevos servicios y sumar al total
+        for id_servicio in servicios_agregar:
+            # Insertar
+            cursor.execute("""
+                INSERT INTO servicios_reserva (id_reserva, id_servicio)
+                VALUES (%s, %s)
+            """, (id_reserva, id_servicio))
+
+            # Sumar precio
+            cursor.execute("""
+                UPDATE reserva
+                SET total = total + (
+                    SELECT precio FROM servicios_extras WHERE id_servicio = %s
+                )
+                WHERE id_reserva = %s
+            """, (id_servicio, id_reserva))
+
+        # 4. ELIMINAR servicios quitados y restar del total
+        for id_servicio in servicios_eliminar:
+            # Eliminar
+            cursor.execute("""
+                DELETE FROM servicios_reserva
+                WHERE id_reserva = %s AND id_servicio = %s
+            """, (id_reserva, id_servicio))
+
+            # Restar precio
+            cursor.execute("""
+                UPDATE reserva
+                SET total = total - (
+                    SELECT precio FROM servicios_extras WHERE id_servicio = %s
+                )
+                WHERE id_reserva = %s
+            """, (id_servicio, id_reserva))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return jsonify({"error": f"Error actualizando experiencias: {str(e)}"}), 500
+
+    cursor.close()
+    conn.close()
+    return jsonify({"message": "Experiencias actualizadas"}), 200
+
+
+@app.route('/api/reservas/complete', methods=['POST'])
+def crear_reserva_con_experiencias():
+    """Crea una reserva y asigna experiencias en una sola transacción, luego envía mail.
+       JSON esperado: {
+           cabin_slug, check_in, check_out, cant_personas, total, nombre, email, telefono, experiencias: [id,...]
+       }
+    """
+    try:
+        data_form = request.json or {}
+
+        # validar campos mínimos
+        required = ['cabin_slug', 'check_in', 'check_out', 'cant_personas', 'total', 'nombre', 'email', 'telefono']
+        for r in required:
+            if r not in data_form:
+                return jsonify({"success": False, "error": f"Falta campo {r}"}), 400
+
+        # 1. Validar fechas
+        check_in, check_out = validar_fechas(data_form['check_in'], data_form['check_out'])
+
+        # 2. Obtener alojamiento y sus datos
+        fila_alojamiento = obtener_alojamiento_por_slug(data_form['cabin_slug'])
+        id_alojamiento = fila_alojamiento['id_alojamiento']
+        capacidad = fila_alojamiento['capacidad']
+
+        # 3. Validar capacidad
+        validar_capacidad(capacidad, int(data_form['cant_personas']))
+
+        # 4. Validar email
+        email_valido = validar_email(data_form['email'])
+
+        # 5. Validar superposición
+        if hay_superposicion(id_alojamiento, check_in, check_out):
+            return jsonify({"success": False, "error": "Las fechas seleccionadas no están disponibles"}), 400
+
+        experiencias_ids = data_form.get('experiencias') or []
+        try:
+            experiencias_ids = [int(x) for x in experiencias_ids]
+        except Exception:
+            return jsonify({"success": False, "error": "Formato inválido en 'experiencias'"}), 400
+
+        # 6. Insertar reserva y experiencias en una sola conexión/tx
+        conn = get_conexion()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT INTO reserva
+                (id_alojamiento, check_in, check_out, cant_personas, total, nombre, email, telefono, estado)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pendiente')
+            """, (
+                id_alojamiento, check_in, check_out, data_form['cant_personas'], data_form['total'], data_form['nombre'], email_valido, data_form['telefono']
+            ))
+            id_reserva = cursor.lastrowid
+
+            # insertar experiencias
+            for sid in experiencias_ids:
+                cursor.execute("INSERT INTO servicios_reserva (id_reserva, id_servicio) VALUES (%s, %s)", (id_reserva, sid))
+
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "error": f"Error creando reserva: {str(e)}"}), 500
+
+        cursor.close()
+        conn.close()
+
+        # enviar mail (si falla, no revertimos la reserva - se registró)
+        try:
+            send_mail_for_reserva(id_reserva)
+        except Exception:
+            pass
+
+        return jsonify({"success": True, "id_reserva": id_reserva}), 201
+
+    except ValueError as err:
+        return jsonify({"success": False, "error": str(err)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Error del servidor: {e}"}), 500
 
 @app.route('/api/reservas/pagar/<int:id_reserva>', methods=['POST'])
 def pagar_reserva(id_reserva):

@@ -79,7 +79,7 @@
         <p><b>Experiencias adicionales seleccionadas:</b></p>
         <ul class="experiencias-lista">
             {% for experiencia in experiencias %}
-                <li>{{ experiencia }}</li>
+                <li>{{ experiencia.title }} - ${{ experiencia.precio }}</li>
             {% else %}
                 <li>No has seleccionado ninguna experiencia adicional.</li>
             {% endfor %}
