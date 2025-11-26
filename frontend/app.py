@@ -61,7 +61,7 @@ def reservar_cabaña(cabin_slug):
 
     cabin = next((c for c in cabins if c['slug'] == cabin_slug), None)
     if cabin:
-        datos_reservas = requests.get(f"{URL_BACKEND}/api/reservas/{cabin['slug']}").json()
+        datos_reservas = requests.get(f"{URL_BACKEND}/api/reservas/{cabin['id']}").json()
         fechas = datos_reservas.get('reservas', [])
         print(fechas)
         return render_template('reservar_cabaña.html', cabin=cabin, real_reserved_dates=fechas)
