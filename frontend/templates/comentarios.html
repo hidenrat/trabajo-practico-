@@ -18,6 +18,17 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="cabanias">Cabaña en la que se hospedó</label>
+                            <select class="form-control" id="cabanias" name="cabanias" required>
+                                <option value="">Selecciona la cabaña</option>
+                                <option value="mirador-sol">Mirador del Sol</option>
+                                <option value="bosque-vivo">Bosque Vivo</option>
+                                <option value="rincon-lunar">Rincón Lunar</option>
+                                <option value="rio-nativo">Río Nativo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="nombre_cliente">El ID de tu reserva:</label>
                             <input type="text" class="form-control" id="numero_reserva" name="numero_reserva" required>
                         </div>
@@ -55,5 +66,6 @@
             </div>
         </div>
     </section>
+
 
     {% endblock %}
