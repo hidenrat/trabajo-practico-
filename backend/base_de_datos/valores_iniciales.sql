@@ -267,24 +267,3 @@ Vive la serenidad del agua y la naturaleza. Alquilá tu cabaña Nordika y prepá
  "imgs/experiencia-6.jpg",
  700
 );
-
-INSERT INTO opiniones (nombre, cabania, id_reserva, puntuacion, comentario) VALUES
-(   
-    "Elena Márquez",
-    "mirador-sol",
-    1,
-    5,
-    "La experiencia fue increíblemente relajante. Las cabañas combinan un diseño moderno con un ambiente cálido y acogedor que te hace sentir como en casa desde el primer momento. Me encantó la atención al detalle: desde la iluminación suave hasta los materiales naturales usados en la decoración. Además, el silencio del entorno y el sonido del viento entre los árboles crean una atmósfera perfecta para desconectar. Es ideal tanto para una escapada romántica como para unos días de descanso en soledad."
-), (
-    "Carlos Ibáñez",
-    "bosque-vivo",
-    2,
-    4,
-    "Lo que más me impresionó fue la arquitectura de las cabañas: líneas minimalistas, ventanales amplios y un uso inteligente de la madera que resalta el entorno natural sin invadirlo. Se nota una clara inspiración escandinava, con un equilibrio entre funcionalidad y calidez. El aislamiento térmico es excelente, y disfrutar del paisaje nevado desde el interior fue una experiencia mágica. Sin duda, un modelo de alojamiento que demuestra que el confort moderno puede ir de la mano con la sostenibilidad."
-), (
-    "Lucas Torres",
-    "rincon-lunar",
-    3,
-    5,
-    "Nordika Cabins ofrece una experiencia distinta, pensada para quienes buscan desconexión total sin renunciar al confort. Las cabañas están equipadas con todo lo necesario, pero lo que realmente marca la diferencia es el ambiente: paz, diseño y naturaleza se mezclan de forma perfecta. El servicio fue amable y discreto, y los alrededores invitan a caminar, leer o simplemente contemplar el paisaje. Es un lugar que invita a bajar el ritmo y disfrutar del presente."
-);

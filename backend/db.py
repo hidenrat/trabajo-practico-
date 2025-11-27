@@ -15,5 +15,3 @@ def get_conexion():
     )
     return conexion
 
-
-
