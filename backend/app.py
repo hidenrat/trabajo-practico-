@@ -607,6 +607,63 @@ def crear_reserva_con_experiencias():
     except Exception as e:
         return jsonify({"success": False, "error": f"Error del servidor: {e}"}), 500
 
+@app.route('/api/comentarios', methods=['POST'])
+def agregar_comentarios_cliente():
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        nombre = data.get('nombre')
+        cabanias = data.get('cabanias')
+        contacto = data.get('contacto')
+        reserva = data.get('reserva')
+        puntuacion = data.get('puntuacion')
+        comentario = data.get('comentario')
+        sugerencia = data.get('sugerencia')
+        
+        if not (nombre and cabanias and reserva and puntuacion):
+                return jsonify({"error": "Faltan campos obligatorios"}), 400
+            
+        try:
+            conn = get_conexion()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT id_reserva FROM reserva WHERE id_reserva = %s
+            """, (reserva,))
+            
+            reserva_existente = cursor.fetchone()
+            if reserva_existente is None:
+                return jsonify({"error": "El ID de reserva no existe"}), 400
+
+            cursor.execute("""
+                INSERT INTO opiniones (
+                nombre, cabanias, contacto, id_reserva, puntuacion, comentario, sugerencia
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (nombre, cabanias, contacto, reserva, puntuacion, comentario, sugerencia))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            return jsonify({"message": "Comentario agregado con éxito"}), 201
+
+        except Exception as e:
+            return jsonify({"error": f"Error al agregar comentario: {str(e)}"}), 500
+
+@app.route('/api/opiniones', methods=['GET'])
+def extraer_opiniones_db():
+    try:
+        conn = get_conexion()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT nombre, cabanias, contacto, id_reserva, puntuacion, comentario, sugerencia
+            FROM opiniones
+            """)
+        opiniones = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(opiniones), 200
+    
+    except Exception as e:
+        return jsonify({"error": f"Error al extraer opiniones: {str(e)}"}), 500
 @app.route('/api/reservas/pagar/<int:id_reserva>', methods=['PATCH'])
 def pagar_reserva(id_reserva):
     conn = get_conexion()
@@ -624,6 +681,7 @@ def pagar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
