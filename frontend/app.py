@@ -17,25 +17,8 @@ experiencias = requests.get(f"{URL_BACKEND}/api/servicios").json()
 
 @app.route('/')
 def index():
-    comentarios = [{
-    "name": "Elena Márquez",
-    "src": "imgs/avatar-1.jpg",
-    "info": "Viajera y fotógrafa de naturaleza.",
-    "opinion": "La experiencia fue increíblemente relajante. Las cabañas combinan un diseño moderno con un ambiente cálido y acogedor que te hace sentir como en casa desde el primer momento. Me encantó la atención al detalle: desde la iluminación suave hasta los materiales naturales usados en la decoración. Además, el silencio del entorno y el sonido del viento entre los árboles crean una atmósfera perfecta para desconectar. Es ideal tanto para una escapada romántica como para unos días de descanso en soledad."
-},
-{
-    "name": "Carlos Ibáñez",
-    "src": "imgs/avatar.jpg",
-    "info": "Arquitecto.",
-    "opinion": "Lo que más me impresionó fue la arquitectura de las cabañas: líneas minimalistas, ventanales amplios y un uso inteligente de la madera que resalta el entorno natural sin invadirlo. Se nota una clara inspiración escandinava, con un equilibrio entre funcionalidad y calidez. El aislamiento térmico es excelente, y disfrutar del paisaje nevado desde el interior fue una experiencia mágica. Sin duda, un modelo de alojamiento que demuestra que el confort moderno puede ir de la mano con la sostenibilidad."
-},
-{
-    "name": "Lucas Torres",
-    "src": "imgs/avatar-2.jpg",
-    "info": "Periodista de viajes.",
-    "opinion": "Nordika Cabins ofrece una experiencia distinta, pensada para quienes buscan desconexión total sin renunciar al confort. Las cabañas están equipadas con todo lo necesario, pero lo que realmente marca la diferencia es el ambiente: paz, diseño y naturaleza se mezclan de forma perfecta. El servicio fue amable y discreto, y los alrededores invitan a caminar, leer o simplemente contemplar el paisaje. Es un lugar que invita a bajar el ritmo y disfrutar del presente."
-}
-]
+    comentarios = requests.get(f"{URL_BACKEND}/api/opiniones").json()
+    print(f"comentarios: {comentarios}")
     return render_template('index.html', cabins=cabins, experiences=experiencias, testimonials=comentarios)
 
 @app.route('/cabañas')
@@ -261,19 +244,21 @@ def procesar_comentario():
     }
 
     try:
-        response = request.post(
+        response = requests.post(
             "http://localhost:5003/api/comentarios",
             json=opiniones_data,
             headers={'Content-Type': 'application/json'}
         )
     
         if response.status_code == 201:
-            return redirect(url_for('index '))
+            return redirect(url_for('index'))
         else:
-            return "Error al enviar el comentario.", 400
+            return render_template('error_handle.html', error_type='Error al enviar comentario', error_message='El ID de reserva no es válido. Por favor, intenta nuevamente.'
+            ), 400
     
     except requests.exceptions.RequestException:
-        return "Error de conexión con el backend.", 500
+        return render_template('error_handle.html', error_type='Error de conexión', error_message='No se pudo conectar con el servidor. Por favor, intenta nuevamente más tarde.'
+        ), 500
 
 if __name__ == '__main__':
     app.run(port= 5002 , debug=True)

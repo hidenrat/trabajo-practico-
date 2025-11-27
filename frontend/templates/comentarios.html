@@ -3,6 +3,7 @@
 {% block title %}Dejar un Comentario - Nordika Cabins{% endblock %}
 
 {% block content %}
+    
     <section id="feedback" class="section">
         <div class="container">
             <div class="row justify-content-center">
@@ -21,10 +22,10 @@
                             <label for="cabanias">Cabaña en la que se hospedó</label>
                             <select class="form-control" id="cabanias" name="cabanias" required>
                                 <option value="">Selecciona la cabaña</option>
-                                <option value="mirador-sol">Mirador del Sol</option>
-                                <option value="bosque-vivo">Bosque Vivo</option>
-                                <option value="rincon-lunar">Rincón Lunar</option>
-                                <option value="rio-nativo">Río Nativo</option>
+                                <option value="Mirador del Sol">Mirador del Sol</option>
+                                <option value="Bosque Vivo">Bosque Vivo</option>
+                                <option value="Rincón Lunar">Rincón Lunar</option>
+                                <option value="Río Nativo">Río Nativo</option>
                             </select>
                         </div>
 
@@ -65,7 +66,9 @@
                 </div>
             </div>
         </div>
+        <div class="container text-center" style="display: flex; justify-content: space-around;">
+            <button type="button" class="btn btn-primary btn-block mt-4" onclick="window.history.back();" style="display: flex; justify-content: center;">Volver</button>
+        </div>
     </section>
-
 
     {% endblock %}

@@ -184,6 +184,9 @@
     <section class="section" id="testimonial">
         <div class="container">
             <h6 class="section-title text-center mb-0">Comentarios</h6>
+            {% if testimonials|length == 0 %}
+                <h6 class="mb-5 text-center">Aún no hay comentarios... <br>¡Sé el primero en dejarnos tu opinión!</h6>
+            {% else %}
             <h6 class="section-subtitle mb-5 text-center">Lo que dicen nuestros clientes...</h6>
             <div class="row">
                 {% for testimonial in testimonials %}
@@ -191,17 +194,32 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="media align-items-center mb-3">
-                                    <img class="mr-3" src="{{ url_for('static', filename=testimonial.src, _external=True) }}" alt="">
                                     <div class="media-body">
-                                        <h6 class="mt-1 mb-0">{{ testimonial.name }}</h6>
-                                        <small class="text-muted mb-0">{{ testimonial.info }}</small>     
+                                        <h6 class="mt-1 mb-0">{{ testimonial.nombre }}</h6>
+                                        <small class="text-muted mb-0">{{ testimonial.cabanias }}</small>     
                                     </div>
                                 </div>
-                                <p class="mb-0">{{ testimonial.opinion }}</p>
+                                <div class="stars" role="img" aria-label="Rating: {{ testimonial.puntuacion }}/5">
+                                    Puntuación:
+                                    <div class="star-rating">
+                                        {% for i in range(1,6) %}
+                                            <span class="star{% if i <= testimonial.puntuacion %} filled{% endif %}">★</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="mb-3">Opinión:
+                                    <div class="testimonial-text">"{{ testimonial.comentario }}"</div>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
                 {% endfor %}
+            </div>
+            {% endif %}
+            <div class="text-center mt-4">
+                <a href="{{ url_for('comentarios') }}" class="btn btn-primary btn-sm rounded">Dejá un Comentario</a>
             </div>
         </div>
     </section>
