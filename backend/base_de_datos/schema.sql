@@ -69,3 +69,19 @@ CREATE TABLE imagenes_alojamiento (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
+
+CREATE TABLE opiniones {
+    id_opinion INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    cabanias VARCHAR(50) NOT NULL,
+    contacto VARCHAR(50),
+    id_reserva INT NOT NULL,
+    puntuacion INT(6) NOT NULL,
+    comentario TEXT,
+    sugerencia TEXT,
+
+    FOREIGN KEY (id_reserva) REFERENCES reserva(id_reserva)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+};
+
