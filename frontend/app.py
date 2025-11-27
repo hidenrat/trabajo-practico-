@@ -108,7 +108,7 @@ def mis_reservas():
 
     return render_template('mis_reservas.html', datos=datos_reserva, experiencias=experiencias)
 
-@app.route('/cancelar_reserva', methods=['POST'])
+@app.route('/cancelar_reserva', methods=['PATCH'])
 def cancelar_reserva():
     id_reserva = request.form.get('reservation_id')
     response = requests.post(f"{URL_BACKEND}/api/reservas/cancelar/{id_reserva}")
@@ -119,7 +119,7 @@ def cancelar_reserva():
     return redirect(url_for('mis_reservas'))
 
 
-@app.route('/mis_reservas/actualizar_experiencias', methods=['POST'])
+@app.route('/mis_reservas/actualizar_experiencias', methods=['PATCH'])
 def actualizar_experiencias():
     """Recibe formulario con reservation_id y múltiples experiencias (ids) y llama al backend para actualizar.
        Luego redirige a /mis_reservas?reservation_id=xxx para recargar.
@@ -201,7 +201,7 @@ def procesar_reserva():
             return render_template('error_handle.html', error_type='Error de Conexión (500)', error_message='No se pudo establecer conexión con el servicio de reservas. Inténtelo más tarde.'
             ), 500
 
-@app.route('/pagar_reserva', methods=['POST'])
+@app.route('/pagar_reserva', methods=['PATCH'])
 def pagar_reserva():
     id_reserva = request.form.get('reservation_id')
     # Aquí iría la lógica de pago, que puede incluir redireccionar a una pasarela de pago
