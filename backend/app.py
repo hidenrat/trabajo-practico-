@@ -411,6 +411,33 @@ def enviar_mail_reserva(id_reserva):
     except Exception as e:
         return jsonify({"error": f"No se pudo enviar el email: {str(e)}"}), 500
 
+
+@app.route('/api/reservas/<int:id_reserva>/experiencias', methods=['GET'])
+def obtener_experiencias_reserva(id_reserva):
+    conn = get_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT 
+            sr.id_servicio,
+            se.title,
+            se.subdesc,
+            se.src,
+            se.capacidad,
+            se.precio
+        FROM servicios_reserva sr
+        INNER JOIN servicios_extras se 
+            ON sr.id_servicio = se.id_servicio
+        WHERE sr.id_reserva = %s
+    """, (id_reserva,))
+
+    servicios = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(servicios), 200
+
 @app.route('/api/reservas/cancelar/<int:id_reserva>', methods=['POST'])
 def cancelar_reserva(id_reserva):
 
@@ -622,6 +649,7 @@ def pagar_reserva(id_reserva):
 if __name__ == '__main__':
 
     app.run(port=5003, debug=True)
+
 
 
 
